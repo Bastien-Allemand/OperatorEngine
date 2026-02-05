@@ -1,32 +1,36 @@
-# Prerequisites
-*.d
+# ==========================================
+# VISUAL STUDIO SPECIFIC (STRICT)
+# ==========================================
 
-# Compiled Object files
-*.slo
-*.lo
-*.o
-*.obj
+# Dossier de configuration locale (Le plus important)
+.vs/
+.vs/**
+**/.vs/
 
-# Precompiled Headers
-*.gch
-*.pch
+# Fichiers de build et binaires
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+bin/
+obj/
+out/
+build/
 
-# Compiled Dynamic libraries
-*.so
-*.dylib
-*.dll
+# Fichiers de base de données et cache
+*.VC.db
+*.VC.opendb
+*.VC.db-shm
+*.VC.db-wal
+*.suo
+*.user
+*.userosscache
+*.sln.doccache
+*.cache
 
-# Fortran module files
-*.mod
-*.smod
-
-# Compiled Static libraries
-*.lai
-*.la
-*.a
-*.lib
-
-# Executables
-*.exe
-*.out
-*.app
+# Logs et fichiers temporaires
+*.log
+*.tlog
+*.lastbuildstate
+*.unsuccessfulbuild
+ipch/
