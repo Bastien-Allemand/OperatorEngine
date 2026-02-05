@@ -1,0 +1,54 @@
+{
+    "projects": {
+        "0BED7C61-63E9-02DA-64DD-040511E73563": {
+            "config-debug": {
+                "additionalDependencies": [],
+                "additionalIncludeDirectories": [],
+                "additionalLibraryDirectories": [],
+                "preprocessorDefinitions": []
+            },
+            "config-release": {
+                "additionalDependencies": [],
+                "additionalIncludeDirectories": [],
+                "additionalLibraryDirectories": [],
+                "preprocessorDefinitions": []
+            },
+            "dependencies": [],
+            "dependents": [],
+            "name": "Render",
+            "property-lib": false,
+            "property-pch": true,
+            "property-vcpkg": false,
+            "property-window": true
+        },
+        "2A367E35-5163-468C-4666-668C2DE90B90": {
+            "config-debug": {
+                "additionalDependencies": [],
+                "additionalIncludeDirectories": [],
+                "additionalLibraryDirectories": [],
+                "preprocessorDefinitions": []
+            },
+            "config-release": {
+                "additionalDependencies": [],
+                "additionalIncludeDirectories": [],
+                "additionalLibraryDirectories": [],
+                "preprocessorDefinitions": []
+            },
+            "dependencies": [],
+            "dependents": [],
+            "name": "Engine",
+            "property-lib": false,
+            "property-pch": true,
+            "property-vcpkg": false,
+            "property-window": true
+        }
+    },
+    "projects_name_to_guid": {
+        "Engine": "2A367E35-5163-468C-4666-668C2DE90B90",
+        "Render": "0BED7C61-63E9-02DA-64DD-040511E73563"
+    },
+    "solution_guid": "09FD0E83-750F-3342-7895-688659E27F75",
+    "solution_name": "OperatorEngine",
+    "startup_project": "",
+    "version": "2.0"
+}
