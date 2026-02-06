@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "main.h"
 #include "RenderDevice.h"
+#include "DDSTextureLoader.h"
 
 LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
@@ -28,5 +29,11 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR cmdLine, i
 	RegisterClass(&wc);
 
 	RenderDevice renderDevice;
+	
+	/*HRESULT hr = DirectX::CreateDDSTextureFromFile(
+		renderDevice.GetDevice(),
+		L"assets\\test.dds",
+		nullptr,
+		nullptr);*/
 	return renderDevice.InitWindow(width, height, title, wc, hInstance, cmdShow);
 }

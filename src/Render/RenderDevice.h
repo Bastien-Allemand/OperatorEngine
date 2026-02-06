@@ -15,6 +15,9 @@ public:
 
 	void Update();
 	void Draw();
+
+	ID3D12Device* GetDevice() const { return m_device; }
+
 private:
 
 	DebugLayer* m_debugLayer;
