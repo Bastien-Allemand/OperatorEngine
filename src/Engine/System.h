@@ -6,6 +6,7 @@ class System
 {
 protected:
     GameManager* m_gameManager;
+	std::vector<UINT> m_entities; // Liste des entités que ce système gère
 
 public:
     System();

@@ -2,6 +2,7 @@
 #include <vector>
 #include <unordered_map>
 #include "Componant.h"
+#include "System.h"
 #include <typeindex> // Nécessaire pour identifier les types T
 #include <memory>
 #include <stdexcept>
@@ -11,6 +12,16 @@ class GameManager
 {
 public:
 	static GameManager* GetInstance();
+
+	~GameManager() {
+		for (auto& entityComponents : m_componants) {
+			for (auto* comp : entityComponents) {
+				delete comp; // Supprime réellement l'objet en mémoire
+			}
+			entityComponents.clear();
+		}
+		m_componants.clear();
+	}
 
 	template<typename T>
 	T& AddComponant(UINT entity);
@@ -29,7 +40,7 @@ private:
 
 	std::vector<std::vector<Componant*>> m_componants; //componant
 
-	//std::unordered_map<std::type_index, std::shared_ptr<IComponentArray>> m_componentArrays;
+	std::unordered_map<std::type_index, std::shared_ptr<Componant>> m_componentArrays;
 	// Helper pour récupérer le tableau typé
 	//template<typename T>
 	//std::shared_ptr<ComponentArray<T>> GetArray() {

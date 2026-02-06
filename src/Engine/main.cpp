@@ -38,27 +38,19 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR cmdLine, int cmdS
 
     Transform&  a = gameManager->AddComponant<Transform>(entity1.id.first);
     feu& f = gameManager->AddComponant<feu>(entity1.id.first);
-    a.position.x = 5.0f;
-    a.position.y = 12.0f;
 
-    f.position.x = 1.0f;
-    f.position.y = -8.0f;
 
 
     Transform& b = gameManager->AddComponant<Transform>(entity2.id.first);
     feu&  feur = gameManager->AddComponant<feu>(entity2.id.first);
-
-    b.position.x = 90.0f;
-    b.position.y = 2.0f;
-
-    feur.position.x = 15.0f;
-    feur.position.y = -81.0f;
 
 
 	gameManager->AddComponant<Transform>(entity3.id.first);
     gameManager->AddComponant<feu>(entity3.id.first);
 
 
+	TransformSystem transformSystem;
+	transformSystem.Update({ entity1.id.first, entity2.id.first, entity3.id.first }, 0.016f); // Simule une mise à jour avec un deltaTime de 16ms
     // 4. Récupération du composant
     try {
         Transform& retrievedTransform1 = gameManager->GetComponant<Transform>(entity1.id.first);
