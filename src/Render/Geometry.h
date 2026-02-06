@@ -16,6 +16,7 @@ class Geometry
 	std::vector<vertex> vertices;
 	std::vector<unsigned int> indices;
 
+	void BuildQuad();
 	void BuildVertexBuffer();
 };
 

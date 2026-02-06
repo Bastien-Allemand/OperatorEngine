@@ -3,12 +3,11 @@
 
 DebugLayer::DebugLayer()
 {
-#ifdef _DEBUG
-	if (SUCCEEDED(D3D12GetDebugInterface(IID_PPV_ARGS(&m_debugController))))
-		m_debugController->EnableDebugLayer();
+#if defined(DEBUG) || defined(_DEBUG)
+{
+		ID3D12Debug* debugController;
+}
 #endif
-
-
 }
 
 DebugLayer::~DebugLayer()

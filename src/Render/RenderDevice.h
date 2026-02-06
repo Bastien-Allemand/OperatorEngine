@@ -2,36 +2,33 @@
 
 ///foward dec
 class DebugLayer;
-
+class Factory;
+class Command;
+class ConstantBuffer;
 
 class RenderDevice
 {
 public:
 	RenderDevice();
-
-	int InitWindow(int _width, int _height, const wchar_t* _title, WNDCLASS _windowsClass, HINSTANCE _hInstance, int _cmdShow);
-	bool InitDebugLayer();
-	bool InitDXGIFactory();
-	void InitAdapter();
-	void InitD3D12();
+	void Init();
+	int InitWindow(int _width, int _height, const wchar_t* _title);
 	bool InitDevice();
+	void InitVertexViewBuffer();
+	void Render();
 	void Update();
 	void Draw();
-
-	ID3D12Device* GetDevice() const { return m_device; }
-
 private:
 
-	DebugLayer* m_debugLayer;
-	IDXGIFactory4* m_factory;
-	IDXGIAdapter1* m_adapter;
-	ID3D12Device* m_device;
 
-	ID3D12Resource* m_vertexBuffer;
+	DebugLayer* m_debugLayer;
+	Factory* m_factory;
+	ID3D12Device* m_device;
+	Command* m_command;
+	ConstantBuffer* m_constantBuffer;
+
+	D3D12_VERTEX_BUFFER_VIEW m_vertexBufferView;
+	D3D12_INDEX_BUFFER_VIEW m_indexBufferView;
 
 	//IDXGISwapChain* m_swapChain;
-	//ID3D12CommandQueue* m_commandQueue;
-	//ID3D12CommandAllocator* m_commandAllocator;
-	//ID3D12GraphicsCommandList* m_commandList;
 };
 
