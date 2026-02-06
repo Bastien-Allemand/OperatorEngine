@@ -1,12 +1,18 @@
-#ifndef CORE_DEFINE_H_INCLUDED
-#define CORE_DEFINE_H_INCLUDED
+#pragma once
 
 
 // Library
 
 #pragma comment(lib, "winmm.lib")
 #pragma comment(lib, "ws2_32.lib")
+#define WIN32_LEAN_AND_MEAN 
+#include <windows.h>
+#include <wrl.h>        // Pour Microsoft::WRL::ComPtr
+#include <d3d12.h>
+#include <dxgi1_6.h>
 #include <cstdint>
+#include <string>
+#include <stdexcept>
 
 
 using int8 = __int8;
@@ -28,7 +34,7 @@ using float64 = double;
 using namespace DirectX;
 
 
-
+XMFLOAT3 d;
 
 
 // Maths
@@ -50,5 +56,20 @@ namespace ope {
 }
 
 
+// CATH INITIALISATION OR MEMORY GPU ERROR
+inline void ThrowIfFailed(HRESULT hr) {
+	if (FAILED(hr)) {
+		// Dans un vrai moteur, on loggerait l'erreur ici
+		throw std::runtime_error("DirectX 12 Error: HRESULT " + std::to_string(hr));
+	}
+}
 
+
+#define ALIGN_UP(size, alignment) (((size) + (alignment) - 1) & ~((alignment) - 1))
+
+// DEBUG CONFIGURATION
+#ifdef _DEBUG
+#define ENGINE_DEBUG 1
+#else
+#define ENGINE_DEBUG 0
 #endif
