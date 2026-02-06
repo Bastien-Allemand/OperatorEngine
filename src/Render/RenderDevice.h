@@ -17,6 +17,7 @@ public:
 	void Draw();
 
 	ID3D12Device* GetDevice() const { return m_device; }
+	void SetDevice(ID3D12Device* device) { m_device = device; }
 
 private:
 
