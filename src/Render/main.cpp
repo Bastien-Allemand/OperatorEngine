@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "main.h"
 #include "RenderDevice.h"
-#include "DDSTextureLoader.h"
+#include "DDSTextureLoader12.h"
 
 LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
