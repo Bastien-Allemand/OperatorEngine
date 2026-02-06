@@ -24,7 +24,6 @@ template<typename T>
 inline T GameManager::AddComponant(UINT entity)
 {
 	T componant;
-	/*Componant* componantBase = new T();*/
 	m_componants.push_back(componant);
 	m_componantIndexMap[entity].push_back(m_componants.size() - 1);
 
@@ -36,7 +35,7 @@ inline C GameManager::GetComponant(UINT entity)
 {
 	for (int index : m_componantIndexMap[entity])
 	{
-		if (std::is_same<C, m_componants[index]>)
+		if (std::is_same<C, std::remove_cvref_t<decltype(m_componants[index])>>::value)
 		{
 			return static_cast<C>(m_componants[index]);
 		}
