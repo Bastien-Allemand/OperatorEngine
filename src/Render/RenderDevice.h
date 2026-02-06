@@ -10,7 +10,7 @@ public:
 
 	int InitWindow(int _width, int _height, const wchar_t* _title, WNDCLASS _windowsClass, HINSTANCE _hInstance, int _cmdShow);
 	void InitDebugLayer();
-	void InitDXGIFactory();
+	//void InitDXGIFactory();
 	void InitD3D12();
 
 	void Update();

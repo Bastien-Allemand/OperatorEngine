@@ -1,6 +1,6 @@
 #include "pch.h"
 #include "RenderDevice.h"
-#include "DebugLayer.h"q
+//#include "DebugLayer.h"
 
 RenderDevice::RenderDevice()
 {
@@ -31,11 +31,11 @@ int RenderDevice::InitWindow(int _width, int _height,const wchar_t* _title, WNDC
 
 void RenderDevice::InitDebugLayer()
 {
-	m_debugLayer = new DebugLayer();
-    if (m_debugLayer->GDebugController() != nullptr)
-    {
+	//m_debugLayer = new DebugLayer();
+    //if (m_debugLayer->GDebugController() != nullptr)
+    //{
 
-    }
+    //}
 }
 
 void RenderDevice::InitD3D12()
