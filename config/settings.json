@@ -41,9 +41,31 @@
             "property-pch": true,
             "property-vcpkg": false,
             "property-window": true
+        },
+        "7AC61C65-12D7-4B43-05AC-469A21C42B14": {
+            "config-debug": {
+                "additionalDependencies": [],
+                "additionalIncludeDirectories": [],
+                "additionalLibraryDirectories": [],
+                "preprocessorDefinitions": []
+            },
+            "config-release": {
+                "additionalDependencies": [],
+                "additionalIncludeDirectories": [],
+                "additionalLibraryDirectories": [],
+                "preprocessorDefinitions": []
+            },
+            "dependencies": [],
+            "dependents": [],
+            "name": "Core",
+            "property-lib": false,
+            "property-pch": true,
+            "property-vcpkg": false,
+            "property-window": false
         }
     },
     "projects_name_to_guid": {
+        "Core": "7AC61C65-12D7-4B43-05AC-469A21C42B14",
         "Engine": "2A367E35-5163-468C-4666-668C2DE90B90",
         "Render": "0BED7C61-63E9-02DA-64DD-040511E73563"
     },
