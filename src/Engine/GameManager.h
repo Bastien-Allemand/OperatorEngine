@@ -2,6 +2,7 @@
 #include <vector>
 #include <unordered_map>
 #include "Componant.h"
+#include <iostream>
 
 class GameManager
 {
@@ -9,10 +10,10 @@ public:
 	static GameManager* GetInstance();
 
 	template<typename T>
-	T AddComponant(UINT entity);
+	T& AddComponant(UINT entity);
 
 	template<typename C>
-	C GetComponant(UINT entity);
+	C& GetComponant(UINT entity);
 
 private:
 	static GameManager* m_instance;
@@ -28,7 +29,7 @@ private:
 };
 
 template<typename T>
-inline T GameManager::AddComponant(UINT entity)
+inline T& GameManager::AddComponant(UINT entity)
 {
 	T componant;
 	GetComponantsArray<T>().push_back(componant);
@@ -38,16 +39,15 @@ inline T GameManager::AddComponant(UINT entity)
 }
 
 template<typename C>
-inline C GameManager::GetComponant(UINT entity)
+inline C& GameManager::GetComponant(UINT entity)
 {
+	auto& array = GetComponantsArray<C>();
 	for (int index : m_componantIndexMap[entity])
 	{
-		auto& array = GetComponantsArray<C>();
-
 		if (index >= 0 && index < array.size())
 		{
 			return array[index];
 		}
 	}
-	return C();
+	throw std::out_of_range("Composant non trouvé pour l'entité demandée");
 }

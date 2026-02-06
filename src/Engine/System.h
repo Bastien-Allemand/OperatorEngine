@@ -1,7 +1,21 @@
 #pragma once
+#include <vector>
+#include <DirectXMath.h>
+#include "GameManager.h"
 class System
 {
-	public:
-	System() = default;
-	virtual void Update() = 0;
+protected:
+    GameManager* m_gameManager;
+
+public:
+    System();
+    virtual ~System() = default;
+    virtual void Update(const std::vector<UINT>& entities, float deltaTime) = 0;
+};
+
+class TransformSystem : public System
+{
+public:
+    TransformSystem() = default;
+    void Update(const std::vector<UINT>& entities, float deltaTime) override;
 };
