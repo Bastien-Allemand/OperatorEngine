@@ -1,4 +1,5 @@
 #pragma once
+
 ///foward dec
 class DebugLayer;
 
@@ -9,19 +10,21 @@ public:
 	RenderDevice();
 
 	int InitWindow(int _width, int _height, const wchar_t* _title, WNDCLASS _windowsClass, HINSTANCE _hInstance, int _cmdShow);
-	void InitDebugLayer();
-	//void InitDXGIFactory();
+	bool InitDebugLayer();
+	bool InitDXGIFactory();
+	void InitAdapter();
 	void InitD3D12();
-
+	bool InitDevice();
 	void Update();
 	void Draw();
 private:
 
 	DebugLayer* m_debugLayer;
-
-
+	IDXGIFactory4* m_factory;
+	IDXGIAdapter1* m_adapter;
 	ID3D12Device* m_device;
 
+	ID3D12Resource* m_vertexBuffer;
 
 	//IDXGISwapChain* m_swapChain;
 	//ID3D12CommandQueue* m_commandQueue;
