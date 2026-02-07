@@ -2,7 +2,7 @@
 #include <iostream>
 #include <vector>
 
-#define INDEX int
+#define INDEX UINT
 #define NUMBER_OF_COMPONENTS int
 struct Entity
 {
