@@ -25,15 +25,15 @@ int Window::Init(int _width, int _height, const wchar_t* _title)
     wc.lpszClassName = L"SampleWindowClass";
     RegisterClass(&wc);
 
-    HWND hwnd = CreateWindowEx(0,wc.lpszClassName,_title,
+    m_hwnd = CreateWindowEx(0,wc.lpszClassName,_title,
         WS_OVERLAPPEDWINDOW,CW_USEDEFAULT, CW_USEDEFAULT,
         _width, _height,nullptr, nullptr, 
         GetModuleHandle(nullptr), nullptr);
-    if (!hwnd)
+    if (!m_hwnd)
         return 0;
 
-    ShowWindow(hwnd, SW_SHOW);
-    UpdateWindow(hwnd);
+    ShowWindow(m_hwnd, SW_SHOW);
+    UpdateWindow(m_hwnd);
 
     return 0;
 }

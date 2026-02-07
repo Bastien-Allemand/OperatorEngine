@@ -14,9 +14,8 @@ bool Factory::InitFactory()
     return false;
 }
 
-bool Factory::Init()
+bool Factory::InitAdapter()
 {
-    InitFactory();
     for (UINT adapterIndex = 0; m_factory->EnumAdapters1(adapterIndex, &m_adapter) != DXGI_ERROR_NOT_FOUND; ++adapterIndex)
     {
         DXGI_ADAPTER_DESC1 desc;
@@ -31,5 +30,8 @@ bool Factory::Init()
 
 Factory::~Factory()
 {
-
+	if (m_factory)
+	    m_factory->Release();
+    if (m_adapter)
+	    m_adapter->Release();
 }
