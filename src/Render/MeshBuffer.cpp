@@ -1,9 +1,9 @@
 #include "pch.h"
-#include "ConstantBuffer.h"
+#include "MeshBuffer.h"
 #include "d3dx12.h"
 #include <iostream>
 
-ConstantBuffer::ConstantBuffer(ID3D12Device* _device, ID3D12GraphicsCommandList* _commandList)
+MeshBuffer::MeshBuffer(ID3D12Device* _device, ID3D12GraphicsCommandList* _commandList)
 {
     const UINT64 vertexBufferSize = 1024;
 
@@ -55,7 +55,7 @@ ConstantBuffer::ConstantBuffer(ID3D12Device* _device, ID3D12GraphicsCommandList*
     }
 }
 
-void ConstantBuffer::AddData(void* _data, size_t _size)
+void MeshBuffer::AddData(void* _data, size_t _size)
 {
     m_vertexUpload->Map(0, nullptr, &m_data);
     memcpy(m_data, _data, sizeof(_data));

@@ -1,34 +1,46 @@
 #pragma once
 
 ///foward dec
-class DebugLayer;
 class Factory;
-class Command;
-class ConstantBuffer;
+class CommandContext;
+class MeshBuffer;
 
 class RenderDevice
 {
 public:
 	RenderDevice();
-	void Init();
-	int InitWindow(int _width, int _height, const wchar_t* _title);
-	bool InitDevice();
-	void InitVertexViewBuffer();
+
+
+
+	bool Init();
 	void Render();
-	void Update();
+
 	void Draw();
 private:
+	CommandContext* m_command;
 
+	MeshBuffer* m_MeshBuffer;
 
-	DebugLayer* m_debugLayer;
 	Factory* m_factory;
+
+	//
+
 	ID3D12Device* m_device;
-	Command* m_command;
-	ConstantBuffer* m_constantBuffer;
 
-	D3D12_VERTEX_BUFFER_VIEW m_vertexBufferView;
-	D3D12_INDEX_BUFFER_VIEW m_indexBufferView;
+	ID3D12CommandQueue* m_queue;
 
-	//IDXGISwapChain* m_swapChain;
+	IDXGISwapChain* m_swapChain;
+
+	ID3D12DescriptorHeap* m_rtvHeap;
+	UINT m_rtvDescriptorSize;
+
+	ID3D12Resource* m_renderTargets[2];
+	UINT m_frameIndex;
+
+	bool InitPhaseState();
+	bool InitPhaseExecution();
+
+	bool InitDevice();
+	void WaitForGpu();
 };
 

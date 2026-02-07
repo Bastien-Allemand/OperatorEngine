@@ -1,8 +1,8 @@
 #pragma once
-class ConstantBuffer
+class MeshBuffer
 {
 public:
-	ConstantBuffer(ID3D12Device* _device, ID3D12GraphicsCommandList* _commandList);
+	MeshBuffer(ID3D12Device* _device, ID3D12GraphicsCommandList* _commandList);
 
 	void AddData(void* _data, size_t _size);
 
