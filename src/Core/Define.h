@@ -1,6 +1,7 @@
 #pragma once
 #include <DirectXMath.h>
 #include <string>
+#include <vector>
 
 using int8 = __int8;
 using int16 = __int16;
@@ -26,4 +27,7 @@ using Matrix4x4f = DirectX::XMFLOAT4X4;
 
 using String = std::string;
 using WString = std::wstring;
+
+template<typename T>
+using Vector = std::vector<T>;
 

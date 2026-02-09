@@ -5,8 +5,10 @@ SwapChain::SwapChain()
 {
 }
 
-DXGI_SWAP_CHAIN_DESC1 SwapChain::BuildSCDesc(int _width, int _height)
+bool SwapChain::Init(int _width, int _height, HWND _handle, IDXGIFactory4* _factory, ID3D12CommandQueue* _queue)
 {
+	IDXGISwapChain1* tempSwapChain = nullptr;
+
 	DXGI_SWAP_CHAIN_DESC1 swapChainDesc = {};
 	swapChainDesc.BufferCount = 2;
 	swapChainDesc.Width = _width;
@@ -16,5 +18,23 @@ DXGI_SWAP_CHAIN_DESC1 SwapChain::BuildSCDesc(int _width, int _height)
 	swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
 	swapChainDesc.SampleDesc.Count = 1;
 
-	return swapChainDesc;
+	HRESULT hr = _factory->CreateSwapChainForHwnd(_queue, _handle, &swapChainDesc,nullptr, nullptr, &tempSwapChain);
+	if (FAILED(hr))
+	{
+		std::cout << "Failed to Build SwapChain" << std::endl;
+		return 1;
+	}
+
+	IDXGISwapChain3* swapchainref = nullptr;
+	hr = tempSwapChain->QueryInterface(IID_PPV_ARGS(&swapchainref)); // because i need acces to GetCurrentBackBufferIndex() so i cast to newer version
+	if (FAILED(hr))
+	{
+		std::cout << "Failed to cast swapchain to version 3" << std::endl;
+		return 1;
+	}
+
+	m_swapChain = swapchainref;
+	tempSwapChain->Release();
+
+	return 0;
 }

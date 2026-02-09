@@ -3,10 +3,11 @@ class SwapChain
 {
 public:
 	SwapChain();
-	DXGI_SWAP_CHAIN_DESC1 BuildSCDesc(int _width, int _height);
+	bool Init(int _width, int _height, HWND _handle, IDXGIFactory4* _factory, ID3D12CommandQueue* _queue);
+
 	IDXGISwapChain3* GSwapChain() const { return m_swapChain; }
-	void SSwapChain(IDXGISwapChain3* _swapChain) { m_swapChain = _swapChain; }
+
 private:
-	IDXGISwapChain3* m_swapChain;
+	IDXGISwapChain3* m_swapChain = nullptr;
 };
 

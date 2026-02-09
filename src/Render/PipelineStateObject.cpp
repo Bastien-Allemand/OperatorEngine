@@ -2,34 +2,67 @@
 #include "PipelineStateObject.h"
 #include "Utils.h"
 #include <iostream>
+#include <d3dx12.h>
 
 
-bool PipelineStateObject::Init(ID3D12Device* _device, D3D12_GRAPHICS_PIPELINE_STATE_DESC* _psoDesc)
+bool PipelineStateObject::Init(ID3D12Device* _device)
 {
-	if (m_vertexShader == nullptr)
-	{
-		std::cout << "Vertex shader not initialized" << std::endl;
-		return false;
-	}
-	if (m_pixelShader == nullptr)
-	{
-		std::cout << "Pixel shader not initialized" << std::endl;
-		return false;
-	}
-	if (m_inputLayout.size() == 0)
-	{
-		std::cout << "Input layout not initialized" << std::endl;
-		return false;
-	}
+	D3D12_GRAPHICS_PIPELINE_STATE_DESC psoDesc = {};
+	// Input Layout,Vertex Shader, Pixel Shader
+	InitInputLayout(&psoDesc);
+	InitVs(&psoDesc, L"Shader\\DefaultShader.hlsl");
+	InitPs(&psoDesc, L"Shader\\DefaultShader.hlsl");
 
-	HRESULT hr = _device->CreateGraphicsPipelineState(_psoDesc, IID_PPV_ARGS(&m_pipelineState));
+	psoDesc.pRootSignature = m_rootSig;
+
+	psoDesc.RasterizerState = CD3DX12_RASTERIZER_DESC(D3D12_DEFAULT);
+	psoDesc.BlendState = CD3DX12_BLEND_DESC(D3D12_DEFAULT);
+	psoDesc.DepthStencilState = CD3DX12_DEPTH_STENCIL_DESC(D3D12_DEFAULT);
+	psoDesc.SampleMask = UINT_MAX; // Standard
+	psoDesc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
+
+	psoDesc.NumRenderTargets = 2;
+	psoDesc.RTVFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM;
+	psoDesc.DSVFormat = DXGI_FORMAT_D32_FLOAT;
+	psoDesc.SampleDesc.Count = 1; // No MSAA
+
+	HRESULT hr = _device->CreateGraphicsPipelineState(&psoDesc, IID_PPV_ARGS(&m_pipelineState));
 	if (FAILED(hr))
 	{
 		std::cout << "Failed to create pipeline state object" << std::endl;
-		return false;
+		return 1;
 	}
 
-	return true;
+	return 0;
+}
+
+bool PipelineStateObject::InitRootSig(ID3D12Device* _device)
+{
+	CD3DX12_ROOT_PARAMETER rootParameters[1];
+	rootParameters[0].InitAsConstantBufferView(0); //register b0
+	CD3DX12_ROOT_SIGNATURE_DESC rootSigDesc;
+	rootSigDesc.Init(_countof(rootParameters), rootParameters, 0, nullptr, D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT);
+	ID3DBlob* serializedRootSig = nullptr;
+	ID3DBlob* errorBlob = nullptr;
+	HRESULT hr = D3D12SerializeRootSignature(&rootSigDesc, D3D_ROOT_SIGNATURE_VERSION_1, &serializedRootSig, &errorBlob);
+
+	if (FAILED(hr))
+	{
+		std::cout << "Failed to serialize root signature" << std::endl;
+		if (errorBlob)
+		{
+			std::cout << "Error: " << (char*)errorBlob->GetBufferPointer() << std::endl;
+			errorBlob->Release();
+		}
+		return 1;
+	}
+	hr = _device->CreateRootSignature(0, serializedRootSig->GetBufferPointer(), serializedRootSig->GetBufferSize(), IID_PPV_ARGS(&m_rootSig));
+	if (FAILED(hr))
+	{
+		std::cout << "Failed to create root signature" << std::endl;
+		return 1;
+	}
+	return 0;
 }
 
 bool PipelineStateObject::InitVs(D3D12_GRAPHICS_PIPELINE_STATE_DESC* _desc, const wchar_t* _filename)

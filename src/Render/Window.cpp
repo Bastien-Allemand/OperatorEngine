@@ -1,27 +1,15 @@
 #include "pch.h"
 #include "Window.h"
 
-LRESULT CALLBACK Window::WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
-{
-    switch (msg)
-    {
-    case WM_DESTROY:
-        PostQuitMessage(0);
-        break;
 
-    default:
-        return DefWindowProc(hwnd, msg, wParam, lParam);
-    }
-    return 0;
-}
 
-int Window::Init(int _width, int _height, const wchar_t* _title)
+int Window::Init(int _width, int _height, const wchar_t* _title, WNDPROC _WndProc)
 {
 	m_width = _width;
 	m_height = _height;
 
     WNDCLASS wc = { 0 };
-    wc.lpfnWndProc = WndProc;
+    wc.lpfnWndProc = _WndProc;
     wc.hInstance = GetModuleHandle(nullptr);
     wc.lpszClassName = L"SampleWindowClass";
     RegisterClass(&wc);
