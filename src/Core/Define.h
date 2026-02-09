@@ -1,6 +1,8 @@
 #pragma once
 #include <DirectXMath.h>
 #include <string>
+#include <iostream>
+#include <cstdlib>
 
 using int8 = __int8;
 using int16 = __int16;
@@ -25,3 +27,19 @@ using Matrix4x4f = DirectX::XMFLOAT4X4;
 
 using String = std::string;
 using WString = std::wstring;
+
+enum class DebugFlag {
+    Info,  
+    Warning, 
+    Error   
+};
+
+#define DEBUG_MESSAGE(msg, flag) \
+    do { \
+        if (flag == DebugFlag::Error) { \ \
+            std::cerr << "[CRITICAL ERROR] " << msg << std::endl; \ \
+            std::abort(); \
+        } else { \ \
+            std::cout << "[LOG] " << msg << std::endl; \
+        } \
+    } while(0)
