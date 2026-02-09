@@ -8,6 +8,7 @@ LRESULT CALLBACK Window::WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPar
     case WM_DESTROY:
         PostQuitMessage(0);
         break;
+
     default:
         return DefWindowProc(hwnd, msg, wParam, lParam);
     }
@@ -36,6 +37,11 @@ int Window::Init(int _width, int _height, const wchar_t* _title)
     UpdateWindow(m_hwnd);
 
     return 0;
+}
+
+void Window::Resize()
+{
+
 }
 
 int Window::GCwidth()

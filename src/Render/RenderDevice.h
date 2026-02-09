@@ -6,17 +6,19 @@ class CommandContext;
 class MeshBuffer;
 class Window;
 class SwapChain;
+class PipelineStateObject;
+
 class RenderDevice
 {
 public:
 	RenderDevice();
 
-
-
 	bool Init(Window* _mainWindow);
-	void Render();
+
 	void Run();
+
 	void Draw();
+
 private:
 	CommandContext* m_command;
 
@@ -25,6 +27,8 @@ private:
 	Factory* m_factory;
 
 	Window* m_window;
+
+	PipelineStateObject* m_pso;
 	//
 
 	ID3D12Device* m_device;
@@ -38,13 +42,18 @@ private:
 	ID3D12Resource* m_renderTargets[2];
 	UINT m_frameIndex;
 
+	ID3D12RootSignature* m_rootSig;
+
 	ID3D12Fence* m_fence;
 	UINT64 m_fenceValue;
 	HANDLE m_fenceEvent;
+
+	void Render();
 	bool InitPhaseState();
 	bool InitPhaseExecution();
 	bool InitPhaseRender();
 	bool InitPhaseClose();
+	bool InitPhasePso();
 	void WaitForGpu();
 };
 
