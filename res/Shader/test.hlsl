@@ -1,42 +1,27 @@
-//***************************************************************************************
-// color.hlsl by Frank Luna (C) 2015 All Rights Reserved.
-//
-// Transforms and colors geometry.
-//***************************************************************************************
-
-cbuffer cbPerObject : register(b0)
-{
-	float4x4 gWorldViewProj; 
-};
+Texture2D gTexture : register(t0);
+SamplerState gSampler : register(s0);
 
 struct VertexIn
 {
-	float3 PosL  : POSITION;
-    float4 Color : COLOR;
+    float3 Position : POSITION;
+    float2 TexCoord : TEXCOORD;
 };
 
 struct VertexOut
 {
-	float4 PosH  : SV_POSITION;
-    float4 Color : COLOR;
+    float4 Position : SV_POSITION;
+    float2 TexCoord : TEXCOORD;
 };
 
 VertexOut VS(VertexIn vin)
 {
-	VertexOut vout;
-	
-	// Transform to homogeneous clip space.
-	vout.PosH = mul(float4(vin.PosL, 1.0f), gWorldViewProj);
-	
-	// Just pass vertex color into the pixel shader.
-    vout.Color = vin.Color;
-    
+    VertexOut vout;
+    vout.Position = float4(vin.Position, 1.0f);
+    vout.TexCoord = vin.TexCoord;
     return vout;
 }
 
 float4 PS(VertexOut pin) : SV_Target
 {
-    return float4(1.f, 0.f, 0.f, 1.f);
+    return gTexture.Sample(gSampler, pin.TexCoord);
 }
-
-
