@@ -1,7 +1,25 @@
 #pragma once
+#include <vector>
+#include <DirectXMath.h>
+#include "GameManager.h"
+
+class GameManager;
+
 class System
 {
-	public:
-	System() = default;
-	virtual void Update() = 0;
+public:
+    System();
+    virtual ~System() = default;
+    virtual void Update( float deltaTime) = 0;
+	virtual void AddEntity(UINT entityId);
+protected:
+    GameManager* m_gameManager;
+    std::vector<UINT> m_entities; // Liste des entités que ce système gère
+};
+
+class TransformSystem : public System
+{
+public:
+    TransformSystem() = default;
+    void Update(float deltaTime) override;
 };
