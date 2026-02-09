@@ -8,13 +8,23 @@ System::System()
     m_gameManager = GameManager::GetInstance();
 }
 
-void TransformSystem::Update(const std::vector<UINT>& entities, float deltaTime)
+void System::AddEntity(UINT entity) {
+    if (entity >= m_entities.size()) {
+        m_entities.resize(entity + 1);
+		m_entities[entity] = entity;
+    }
+}
+
+void TransformSystem::Update( float deltaTime)
 {
-    for (UINT entityId : entities)
+    for (UINT entityId : m_entities)
     {
         Transform& transform = m_gameManager->GetComponant<Transform>(entityId);
         if (transform.id != entityId) continue;
 
+		transform.position.x *= 2; // Exemple de déplacement
+		transform.position.y *= 2; // Exemple de déplacement
+		transform.position.z *= 2; // Exemple de déplacement
         XMVECTOR pos = XMLoadFloat3(&transform.position);
         XMVECTOR scale = XMLoadFloat3(&transform.scale);
         XMVECTOR rot = XMLoadFloat4(&transform.quaternion);
