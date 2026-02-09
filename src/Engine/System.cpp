@@ -15,6 +15,9 @@ void TransformSystem::Update(const std::vector<UINT>& entities, float deltaTime)
         Transform& transform = m_gameManager->GetComponant<Transform>(entityId);
         if (transform.id != entityId) continue;
 
+		transform.position.x *= 2; // Exemple de déplacement
+		transform.position.y *= 2; // Exemple de déplacement
+		transform.position.z *= 2; // Exemple de déplacement
         XMVECTOR pos = XMLoadFloat3(&transform.position);
         XMVECTOR scale = XMLoadFloat3(&transform.scale);
         XMVECTOR rot = XMLoadFloat4(&transform.quaternion);

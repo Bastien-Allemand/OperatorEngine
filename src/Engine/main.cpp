@@ -42,8 +42,6 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR cmdLine, int cmdS
 	a.position = XMFLOAT3(1.0f, 2.0f, 3.0f);
 
 
-
-
     Transform& b = gameManager->AddComponant<Transform>(entity2.id.first);
     feu&  feur = gameManager->AddComponant<feu>(entity2.id.first);
     b.position = XMFLOAT3(70.0f, 9.0f, -58.0f);
@@ -71,10 +69,10 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR cmdLine, int cmdS
 
         // Test pour voir si ça marche
         std::cout << "Position X : " << retrievedTransform1.position.x << std::endl;
-        std::cout << "Position X : " << retrievedTransformfeu1.position.x << std::endl;
+        std::cout << "Position X : " << retrievedTransformfeu1.position.y << std::endl;
 
         std::cout << "Position X : " << retrievedTransform2.position.x << std::endl;
-        std::cout << "Position X : " << retrievedTransformfeu2.position.x << std::endl;
+        std::cout << "Position X : " << retrievedTransformfeu2.position.y << std::endl;
         //std::cout << "Position X : " << retrievedTransform2.position.x << std::endl;
     }
     catch (const std::exception& e) {

@@ -13,15 +13,7 @@ class GameManager
 public:
 	static GameManager* GetInstance();
 
-	~GameManager() {
-		for (auto& entityComponents : m_componants) {
-			for (auto* comp : entityComponents) {
-				delete comp; // Supprime réellement l'objet en mémoire
-			}
-			entityComponents.clear();
-		}
-		m_componants.clear();
-	}
+	~GameManager();
 
 	template<typename T>
 	T& AddComponant(UINT entity);
@@ -38,9 +30,10 @@ public:
 private:
 	static GameManager* m_instance;
 
-	std::vector<std::vector<Componant*>> m_componants; //componant
+	std::vector<std::vector<Componant*>> m_componants;
 
 	std::unordered_map<std::type_index, std::shared_ptr<Componant>> m_componentArrays;
+
 	// Helper pour récupérer le tableau typé
 	//template<typename T>
 	//std::shared_ptr<ComponentArray<T>> GetArray() {
@@ -52,8 +45,6 @@ private:
 	//	return std::static_pointer_cast<ComponentArray<T>>(m_componentArrays[typeName]);
 	//}
 };
-
-
 
 //template<typename T>
 //inline T& GameManager::AddComponant(UINT entity)

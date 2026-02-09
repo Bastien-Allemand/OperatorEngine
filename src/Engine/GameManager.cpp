@@ -11,3 +11,14 @@ GameManager* GameManager::GetInstance()
     }
     return m_instance;
 }
+
+GameManager::~GameManager()
+{
+	for (auto& entityComponents : m_componants) {
+		for (auto* comp : entityComponents) {
+			delete comp; // Supprime réellement l'objet en mémoire
+		}
+		entityComponents.clear();
+	}
+	m_componants.clear();
+}
