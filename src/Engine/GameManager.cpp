@@ -22,3 +22,10 @@ GameManager::~GameManager()
 	}
 	m_componants.clear();
 }
+
+void GameManager::AddEntity(UINT entity)
+{
+	if (entity >= m_componants.size()) {
+		m_componants.resize(entity + 1);
+	}
+}

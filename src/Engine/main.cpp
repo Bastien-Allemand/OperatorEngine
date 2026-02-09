@@ -39,6 +39,7 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR cmdLine, int cmdS
     Transform&  a = gameManager->AddComponant<Transform>(entity1.id.first);
     feu& f = gameManager->AddComponant<feu>(entity1.id.first);
 
+ 
 	a.position = XMFLOAT3(1.0f, 2.0f, 3.0f);
 
 
@@ -51,10 +52,12 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR cmdLine, int cmdS
 
     c.position = XMFLOAT3(7.0f, 0.0f, -5.0f);
 
+    TransformSystem& transformSystem = gameManager->AddSystem<TransformSystem>();
+	transformSystem.AddEntity(entity1.id.first);
+	transformSystem.AddEntity(entity2.id.first);
+	transformSystem.AddEntity(entity3.id.first);
 
-	std::vector<UINT> transformEntities = { entity1.id.first, entity2.id.first, entity3.id.first };
-	TransformSystem transformSystem;
-	transformSystem.Update(transformEntities, 0.016f); // Simule une mise à jour avec un deltaTime de 16ms
+	//transformSystem.Update( 0.016f); // Simule une mise à jour avec un deltaTime de 16ms
     // 4. Récupération du composant
     try {
         Transform& retrievedTransform1 = gameManager->GetComponant<Transform>(entity1.id.first);
@@ -64,7 +67,10 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR cmdLine, int cmdS
         feu& retrievedTransformfeu2 = gameManager->GetComponant<feu>(entity2.id.first);
 
         //Transform& retrievedTransform2 = gameManager->GetComponant<Transform>(dhgfheis.id.first);
-
+        for (auto& system : gameManager->GetSystems())
+        {
+			system->Update(0.016f);
+        }
 
 
         // Test pour voir si ça marche

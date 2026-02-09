@@ -8,6 +8,8 @@
 #include <stdexcept>
 #include <iostream>
 
+class System;
+
 class GameManager
 {
 public:
@@ -21,16 +23,24 @@ public:
 	template<typename C>
 	C& GetComponant(UINT entity);
 
-	void AddEntity(UINT entity) {
-		if (entity >= m_componants.size()) {
-			m_componants.resize(entity + 1);
-		}
-	}
+	template<typename S>
+	S& AddSystem();
+
+	template<typename C>
+	C& GetSystem();
+
+	void AddEntity(UINT entity);
+
+	std::vector<System*> GetSystems() { return m_systems; }
 
 private:
+
 	static GameManager* m_instance;
 
 	std::vector<std::vector<Componant*>> m_componants;
+	std::vector<System*> m_systems;
+
+
 
 	std::unordered_map<std::type_index, std::shared_ptr<Componant>> m_componentArrays;
 
@@ -94,6 +104,29 @@ inline C& GameManager::GetComponant(UINT entity)
 	// Parcourt les composants de l'entité et tente de caster vers C
 	for (auto& basePtr : m_componants[entity]) {
 
+		C* derived = dynamic_cast<C*>(basePtr);
+
+		if (derived != nullptr) {
+			return *derived;
+		}
+	}
+	throw std::runtime_error("Composant de ce type non trouvé pour l'entité demandée");
+}
+
+template<typename S>
+inline S& GameManager::AddSystem()
+{
+	S* newSystem = new S;
+	m_systems.push_back(newSystem);
+
+	return *newSystem;
+}
+
+template<typename C>
+inline C& GameManager::GetSystem()
+{
+	// Parcourt les composants de l'entité et tente de caster vers C
+	for (auto& basePtr : m_systems) {
 		C* derived = dynamic_cast<C*>(basePtr);
 
 		if (derived != nullptr) {
