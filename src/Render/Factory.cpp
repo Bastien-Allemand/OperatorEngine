@@ -10,8 +10,8 @@ Factory::Factory()
 bool Factory::InitFactory()
 {
     if (SUCCEEDED(CreateDXGIFactory1(IID_PPV_ARGS(&m_factory))))
-        return true;
-    return false;
+        return 0;
+    return 1;
 }
 
 bool Factory::InitAdapter()
