@@ -24,6 +24,7 @@ void App::Initialize()
 				AllocConsole();
 				FILE* pfile = nullptr;
 				freopen_s(&pfile, "CONOUT$", "w", stdout);
+				freopen_s(&pfile, "CONOUT$", "w", stderr);
 
 				std::cout << "Console Initialized" << std::endl;
 		#endif
@@ -41,6 +42,7 @@ App::~App()
 {
 #if defined(DEBUG) | defined(_DEBUG)
 	fclose(stdout);
+	fclose(stderr);
 	FreeConsole();
 #endif
 }

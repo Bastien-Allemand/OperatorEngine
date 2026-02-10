@@ -1,7 +1,9 @@
 #pragma once
 #include <DirectXMath.h>
 #include <string>
+#include <iostream>
 #include <vector>
+#include <cstdlib>
 
 using int8 = __int8;
 using int16 = __int16;
@@ -9,7 +11,6 @@ using int32 = __int32;
 using int64 = __int64;
 using int32_t = __int32;
 
-using byte = unsigned char;
 using uint8 = unsigned __int8;
 using uint16 = unsigned __int16;
 using uint32 = unsigned __int32;
@@ -31,3 +32,18 @@ using WString = std::wstring;
 template<typename T>
 using Vector = std::vector<T>;
 
+enum class DebugFlag {
+    Log,  
+    Warning, 
+    Error   
+};
+
+#define DEBUG_MESSAGE(msg, flag) \
+    do { \
+        if (flag == DebugFlag::Error) { \ \
+            std::cerr << "[ERROR] " << msg << std::endl; \ \
+            std::abort(); \
+        } else { \ \
+            std::cout << "[LOG] " << msg << std::endl; \
+        } \
+    } while(0)

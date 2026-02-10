@@ -8,6 +8,7 @@
 #include "PipelineStateObject.h"
 #include "SwapChain.h"
 #include "Fence.h"
+#include "Descriptors.h"
 
 
 RenderEngine::~RenderEngine()
@@ -23,7 +24,7 @@ bool RenderEngine::Init(int _width, int _height, HWND _handle)
 	m_pipelineStateObject = new PipelineStateObject();
 	m_swapChain = new SwapChain();
 	m_fence = new Fence();
-
+	m_desc = new Descriptors();
 	//init factory
 	if (m_factory->InitFactory())
 	{
@@ -64,28 +65,24 @@ bool RenderEngine::Init(int _width, int _height, HWND _handle)
 	}
 
 	//init descriptor heap for render target views
-	D3D12_DESCRIPTOR_HEAP_DESC rtvHeapDesc = {};
-	rtvHeapDesc.NumDescriptors = 2; // One for each buffer
-	rtvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_RTV;
-	rtvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
-	hr = m_renderDevice->GDevice()->CreateDescriptorHeap(&rtvHeapDesc, IID_PPV_ARGS(&m_rtvHeap));
+	hr = m_desc->InitRTV(m_renderDevice->GDevice());
 	if (FAILED(hr))
 	{
-		std::cout << "Failed to create RTV descriptor heap" << std::endl;
+		std::cout << "Failed to Init RTV" << std::endl;
 		return 1;
 	}
-
-	hr = m_rtvDescriptorSize = m_renderDevice->GDevice()->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
+	hr = m_desc->InitDSV(m_renderDevice->GDevice());
 	if (FAILED(hr))
 	{
-		std::cout << "Failed to get RTV descriptor size" << std::endl;
+		std::cout << "Failed to Init DSV" << std::endl;
 		return 1;
 	}
-	CD3DX12_CPU_DESCRIPTOR_HANDLE rtvHandle(m_rtvHeap->GetCPUDescriptorHandleForHeapStart());
-
-	// Create root signature
-	
-	m_pipelineStateObject->Init(m_renderDevice->GDevice());
+	hr = m_pipelineStateObject->Init(m_renderDevice->GDevice());
+	if (FAILED(hr))
+	{
+		std::cout << "Failed to Init PSO" << std::endl;
+		return 1;
+	}
 
 	m_fence->Init(m_renderDevice->GDevice());
 	// Create a RTV for each frame.
@@ -109,7 +106,7 @@ void RenderEngine::Update()
 	//auto barrier = CD3DX12_RESOURCE_BARRIER::Transition(m_renderTargets[m_frameIndex], D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET);
 
 	//m_commandContext->GCommandList()->ResourceBarrier(1, &barrier);
-
+	//m_commandContext->GCommandList()->SetGraphicsRootSignature()
 	//draw calls would go here
 
 	//barrier = CD3DX12_RESOURCE_BARRIER::Transition(m_renderTargets[m_frameIndex], D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT);

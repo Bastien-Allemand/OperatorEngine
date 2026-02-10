@@ -6,6 +6,7 @@ class SwapChain;
 class RenderDevice;
 class Factory;
 class Fence;
+class Descriptors;
 
 class RenderEngine
 {
@@ -27,8 +28,7 @@ private:
 
 	ID3D12CommandQueue* m_queue = nullptr;
 
-	ID3D12DescriptorHeap* m_rtvHeap = nullptr;
-	UINT m_rtvDescriptorSize = -1;
+	Descriptors* m_desc;
 
 	Fence* m_fence = nullptr;
 };

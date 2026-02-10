@@ -8,7 +8,7 @@ ID3DBlob* Utils::CompileShader(const WString& _filename, const D3D_SHADER_MACRO*
 	HRESULT hr = S_OK;
 
 	ID3DBlob* byteCode = nullptr;
-	ID3DBlob* errors;
+	ID3DBlob* errors = nullptr;
 	hr = D3DCompileFromFile(_filename.c_str(), _defines, D3D_COMPILE_STANDARD_FILE_INCLUDE,
 		_entryPoint.c_str(), _target.c_str(), compileFlags, 0, &byteCode, &errors);
 
@@ -17,9 +17,9 @@ ID3DBlob* Utils::CompileShader(const WString& _filename, const D3D_SHADER_MACRO*
 		std::cout << "Shader Compilation Failed" << std::endl;
 		if (errors != nullptr)
 		{
-			//std::cout << "Error: " << (char*)errors->GetBufferPointer() << std::endl;
-			//errors->Release();
-			//errors = nullptr;
+			std::cout << "Error: " << (char*)errors->GetBufferPointer() << std::endl;
+			errors->Release();
+			errors = nullptr;
 		}
 
 		return nullptr;

@@ -4,15 +4,14 @@
 #include <iostream>
 #include <d3dx12.h>
 
-
 bool PipelineStateObject::Init(ID3D12Device* _device)
 {
 	D3D12_GRAPHICS_PIPELINE_STATE_DESC psoDesc = {};
 	// Input Layout,Vertex Shader, Pixel Shader
 	InitInputLayout(&psoDesc);
-	InitVs(&psoDesc, L"Shader\\DefaultShader.hlsl");
-	InitPs(&psoDesc, L"Shader\\DefaultShader.hlsl");
-
+	InitVs(&psoDesc, L"../../res/Render/Shader/DefaultShader.hlsl");
+	InitPs(&psoDesc, L"../../res/Render/Shader/DefaultShader.hlsl");
+	InitRootSig(_device);
 	psoDesc.pRootSignature = m_rootSig;
 
 	psoDesc.RasterizerState = CD3DX12_RASTERIZER_DESC(D3D12_DEFAULT);

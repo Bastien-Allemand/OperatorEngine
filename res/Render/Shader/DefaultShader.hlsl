@@ -18,8 +18,7 @@ struct VertexOut
 VertexOut VS(VertexIn vin)
 {
     VertexOut vout;
-    float4 pos = mul(float4(vin.pos, 1.0f),
-gWorldViewProj);
+    vout.pos = mul(float4(vin.pos, 1.0f),gWorldViewProj);
     vout.color = vin.color;
     return vout;
 }
