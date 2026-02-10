@@ -8,13 +8,12 @@ using int8 = __int8;
 using int16 = __int16;
 using int32 = __int32;
 using int64 = __int64;
-using uint32_t = __int32;
 
 using uint8 = unsigned __int8;
 using uint16 = unsigned __int16;
 using uint32 = unsigned __int32;
 using uint64 = unsigned __int64;
-using uint32_t = unsigned __int32;
+using uint32_t = unsigned __int32; 
 
 using float32 = float;
 using float64 = double;
@@ -28,18 +27,20 @@ using Matrix4x4f = DirectX::XMFLOAT4X4;
 using String = std::string;
 using WString = std::wstring;
 
+
 enum class DebugFlag {
-    Info,  
-    Warning, 
-    Error   
+    Info,
+    Warning,
+    Error
 };
+
 
 #define DEBUG_MESSAGE(msg, flag) \
     do { \
-        if (flag == DebugFlag::Error) { \ \
-            std::cerr << "[CRITICAL ERROR] " << msg << std::endl; \ \
+        if (flag == DebugFlag::Error) { \
+            std::wcerr << L"[CRITICAL ERROR] " << msg << std::endl; \
             std::abort(); \
-        } else { \ \
-            std::cout << "[LOG] " << msg << std::endl; \
+        } else { \
+            std::wcout << L"[LOG] " << msg << std::endl; \
         } \
     } while(0)
