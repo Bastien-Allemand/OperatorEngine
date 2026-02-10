@@ -1,35 +1,15 @@
 #pragma once
-///foward dec
-class DebugLayer;
-
+class Factory;
 
 class RenderDevice
 {
 public:
-	RenderDevice();
+	RenderDevice() = default;
 
-	int InitWindow(int _width, int _height, const wchar_t* _title, WNDCLASS _windowsClass, HINSTANCE _hInstance, int _cmdShow);
-	void InitDebugLayer();
-	//void InitDXGIFactory();
-	void InitD3D12();
+	bool Init(Factory* _factory);
 
-	void Update();
-	void Draw();
-
-	ID3D12Device* GetDevice() const { return m_device; }
-	void SetDevice(ID3D12Device* device) { m_device = device; }
-
+	ID3D12Device* GDevice() const { return m_device; }
 private:
-
-	DebugLayer* m_debugLayer;
-
-
-	ID3D12Device* m_device;
-
-
-	//IDXGISwapChain* m_swapChain;
-	//ID3D12CommandQueue* m_commandQueue;
-	//ID3D12CommandAllocator* m_commandAllocator;
-	//ID3D12GraphicsCommandList* m_commandList;
+	ID3D12Device* m_device = nullptr;
 };
 

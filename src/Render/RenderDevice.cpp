@@ -1,53 +1,39 @@
 #include "pch.h"
+
+#include <iostream>
+
 #include "RenderDevice.h"
-//#include "DebugLayer.h"
+#include "Factory.h"
 
-RenderDevice::RenderDevice()
+
+
+bool RenderDevice::Init(Factory* _factory)
 {
-
+	if (_factory == nullptr)	
+	{
+		std::cout << "Factory Required" << std::endl;
+		return 1;
+	}
+	HRESULT hr = D3D12CreateDevice(nullptr, D3D_FEATURE_LEVEL_11_0, IID_PPV_ARGS(&m_device));
+	if (FAILED(hr))
+	{
+		//find adapter for device
+		if (_factory->InitAdapter())
+		{
+			if (hr = D3D12CreateDevice(_factory->GAdapter(), D3D_FEATURE_LEVEL_11_0, IID_PPV_ARGS(&m_device)));//pray this works ig
+			{
+				std::cout << "Device creation failed" << std::endl;
+				return 1;
+			}
+		}
+		else
+		{
+			std::cout << "Failed to find compatible adapter" << std::endl;
+			return 1;
+		}
+	}
+	return 0; 
 }
 
-int RenderDevice::InitWindow(int _width, int _height,const wchar_t* _title, WNDCLASS _windowsClass, HINSTANCE _hInstance, int _cmdShow)
-{
-    HWND hwnd = CreateWindowEx(
-        0,
-        _windowsClass.lpszClassName,
-        L"ENETRE",
-        WS_OVERLAPPEDWINDOW,
-        CW_USEDEFAULT, CW_USEDEFAULT, _width, _height,
-        nullptr, nullptr, _hInstance, nullptr);
-    if (!hwnd)
-        return 0;
-    ShowWindow(hwnd, _cmdShow);
-    UpdateWindow(hwnd);
-    MSG msg = { 0 };
-    while (GetMessage(&msg, nullptr, 0, 0) > 0)
-    {
-        TranslateMessage(&msg);
-        DispatchMessage(&msg);
-    }
-	return static_cast<int>(msg.wParam);
-}
 
-void RenderDevice::InitDebugLayer()
-{
-	//m_debugLayer = new DebugLayer();
-    //if (m_debugLayer->GDebugController() != nullptr)
-    //{
-
-    //}
-}
-
-void RenderDevice::InitD3D12()
-{
-
-}
-
-void RenderDevice::Update()
-{
-}
-
-void RenderDevice::Draw()
-{
-}
 

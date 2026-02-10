@@ -2,9 +2,9 @@
 
 struct vertex
 {
-	DirectX::XMFLOAT3 pos;
-	DirectX::XMFLOAT3 normal;
-	DirectX::XMFLOAT2 uv;
+	Vector3f pos;
+	Vector3f normal;
+	Vector2f uv;
 
 };
 
@@ -13,9 +13,10 @@ class Geometry
 	public:
 	Geometry() = default;
 	~Geometry() = default;
-	std::vector<vertex> vertices;
-	std::vector<unsigned int> indices;
+	Vector<vertex> vertices;
+	Vector<unsigned int> indices;
 
+	void BuildQuad();
 	void BuildVertexBuffer();
 };
 

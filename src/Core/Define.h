@@ -1,6 +1,7 @@
 #pragma once
 #include <DirectXMath.h>
 #include <string>
+#include <vector>
 
 using int8 = __int8;
 using int16 = __int16;
@@ -8,6 +9,7 @@ using int32 = __int32;
 using int64 = __int64;
 using int32_t = __int32;
 
+using byte = unsigned char;
 using uint8 = unsigned __int8;
 using uint16 = unsigned __int16;
 using uint32 = unsigned __int32;
@@ -40,3 +42,7 @@ inline Vector3f CPU_VEC3_ZERO = { 0.0f, 0.0f, 0.0f };
 
 using String = std::string;
 using WString = std::wstring;
+
+template<typename T>
+using Vector = std::vector<T>;
+
