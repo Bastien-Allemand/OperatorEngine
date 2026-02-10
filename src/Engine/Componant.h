@@ -1,6 +1,5 @@
 #pragma once
 
-using namespace DirectX;
 
 struct Componant
 {
@@ -13,67 +12,43 @@ public:
 struct Transform : public Componant
 {
 public:
+	Vector3f position;
 
-	XMFLOAT3 position;
+	Vector3f scale;
 
-	XMFLOAT3 scale;
+	Vector3f direction;
+	Vector3f up;
+	Vector3f right;
+	Quaternion quaternion;
+	Matrix4x4f rot;
 
-	XMFLOAT3 direction;
-	XMFLOAT3 up;
-	XMFLOAT3 right;
-	XMFLOAT4 quaternion;
-	XMFLOAT4X4 rot;
 
-	XMFLOAT4X4 world;
+	bool wolrdNeedsUpdate;
+	bool invWolrdNeedsUpdate;
+private:
+	Matrix4x4f m_world;
+
+	Matrix4x4f m_invworld;
+
+public:
+	Matrix4x4f& GetWorld();
+	Matrix4x4f& GetInvWorld();
 };
 
 struct feu : public Componant
 {
 public:
 
-	XMFLOAT3 position;
+	Vector3f position;
 
-	XMFLOAT3 scale;
+	Vector3f scale;
 
-	XMFLOAT3 direction;
-	XMFLOAT3 up;
-	XMFLOAT3 right;
-	XMFLOAT4 quaternion;
-	XMFLOAT4X4 rot;
+	Vector3f direction;
+	Vector3f up;
+	Vector3f right;
+	Vector3f quaternion;
+	Matrix4x4f rot;
 
-	XMFLOAT4X4 world;
+	Matrix4x4f world;
 };
 
-struct faaa : public Componant
-{
-public:
-
-	XMFLOAT3 position;
-
-	XMFLOAT3 scale;
-
-	XMFLOAT3 direction;
-	XMFLOAT3 up;
-	XMFLOAT3 right;
-	XMFLOAT4 quaternion;
-	XMFLOAT4X4 rot;
-
-	XMFLOAT4X4 world;
-};
-
-struct rm : public Componant
-{
-public:
-
-	XMFLOAT3 position;
-
-	XMFLOAT3 scale;
-
-	XMFLOAT3 direction;
-	XMFLOAT3 up;
-	XMFLOAT3 right;
-	XMFLOAT4 quaternion;
-	XMFLOAT4X4 rot;
-
-	XMFLOAT4X4 world;
-};

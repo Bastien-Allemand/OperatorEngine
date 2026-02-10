@@ -6,7 +6,7 @@ using int8 = __int8;
 using int16 = __int16;
 using int32 = __int32;
 using int64 = __int64;
-using uint32_t = __int32;
+using int32_t = __int32;
 
 using uint8 = unsigned __int8;
 using uint16 = unsigned __int16;
@@ -22,6 +22,21 @@ using Vector3f = DirectX::XMFLOAT3;
 using Vector4f = DirectX::XMFLOAT4;
 using Quaternion = DirectX::XMFLOAT4;
 using Matrix4x4f = DirectX::XMFLOAT4X4;
+
+using Matrix = DirectX::XMMATRIX;
+using Vector = DirectX::XMVECTOR;
+
+
+
+
+inline Vector3f CPU_VEC3_RIGHT = { 1.0f, 0.0f, 0.0f };
+inline Vector3f CPU_VEC3_UP = { 0.0f, 1.0f, 0.0f };
+inline Vector3f CPU_VEC3_DIR = { 0.0f, 0.0f, 1.0f };
+inline Vector3f CPU_VEC3_ZERO = { 0.0f, 0.0f, 0.0f };
+
+
+
+
 
 using String = std::string;
 using WString = std::wstring;

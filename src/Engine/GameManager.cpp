@@ -15,7 +15,7 @@ GameManager* GameManager::GetInstance()
 GameManager::~GameManager()
 {
 	for (auto& entityComponents : m_componants) {
-		for (auto* comp : entityComponents) {
+		for (auto& comp : entityComponents) {
 			delete comp; // Supprime réellement l'objet en mémoire
 		}
 		entityComponents.clear();
@@ -23,9 +23,18 @@ GameManager::~GameManager()
 	m_componants.clear();
 }
 
-void GameManager::AddEntity(UINT entity)
+void GameManager::AddEntity(UINT entity, bool hasComponant, bool hasSystem)
 {
 	if (entity >= m_componants.size()) {
-		m_componants.resize(entity + 1);
+		m_componants.push_back(std::vector<Componant*>()); // Ajoute une nouvelle liste de composants pour cette entité
+	} // Initialise la liste des composants pour cette entité
+
+	if (hasComponant)
+	{
+		m_componants.push_back(std::vector<Componant*>()); // Ajoute une nouvelle liste de composants pour cette entité
+	}
+	if (hasSystem)
+	{
+		//m_systems.push_back(System);// Ajoute une nouvelle liste de systèmes pour cette entité
 	}
 }

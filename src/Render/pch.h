@@ -9,6 +9,7 @@
 #include <vector>
 #include "DDSTextureLoader12.h"
 #include "d3dx12.h"
+#include "../Core/Define.h"
 #pragma comment(lib, "d3d12.lib")
 #pragma comment(lib, "dxgi.lib")
 #pragma comment(lib, "d3dcompiler.lib")

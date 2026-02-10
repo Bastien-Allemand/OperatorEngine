@@ -3,6 +3,7 @@
 #include <unordered_map>
 #include "Componant.h"
 #include "System.h"
+#include "ECS.h"
 #include <typeindex> // Nécessaire pour identifier les types T
 #include <memory>
 #include <stdexcept>
@@ -24,15 +25,17 @@ public:
 	C& GetComponant(UINT entity);
 
 	template<typename S>
-	S& AddSystem();
+	S& AddSystem(UINT entity);
 
 	template<typename C>
 	C& GetSystem();
 
-	void AddEntity(UINT entity);
+	void AddEntity(UINT entity, bool hasComponant, bool hasSystem);
 
-	std::vector<System*> GetSystems() { return m_systems; }
+	//std::vector<System*> GetSystems() { return m_systems; }
 
+
+	//ECS ecs;
 private:
 
 	static GameManager* m_instance;
@@ -114,9 +117,14 @@ inline C& GameManager::GetComponant(UINT entity)
 }
 
 template<typename S>
-inline S& GameManager::AddSystem()
+inline S& GameManager::AddSystem(UINT entity)
 {
 	S* newSystem = new S;
+	newSystem->id = entity;
+	//if (entity >= m_systems.size()) 
+	//{
+	//	throw std::out_of_range("Entité inconnue (indice hors bornes)");
+	//}
 	m_systems.push_back(newSystem);
 
 	return *newSystem;
