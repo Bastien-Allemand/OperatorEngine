@@ -2,6 +2,8 @@
 #include <DirectXMath.h>
 #include <string>
 #include <vector>
+#include <iostream>
+#include <cstdlib>
 
 using int8 = __int8;
 using int16 = __int16;
@@ -14,7 +16,7 @@ using uint8 = unsigned __int8;
 using uint16 = unsigned __int16;
 using uint32 = unsigned __int32;
 using uint64 = unsigned __int64;
-using uint32_t = unsigned __int32;
+using uint32_t = unsigned __int32; 
 
 using float32 = float;
 using float64 = double;
@@ -46,3 +48,20 @@ using WString = std::wstring;
 template<typename T>
 using Vector = std::vector<T>;
 
+
+enum class DebugFlag {
+    Info,
+    Warning,
+    Error
+};
+
+
+#define DEBUG_MESSAGE(msg, flag) \
+    do { \
+        if (flag == DebugFlag::Error) { \
+            std::wcerr << L"[CRITICAL ERROR] " << msg << std::endl; \
+            std::abort(); \
+        } else { \
+            std::wcout << L"[LOG] " << msg << std::endl; \
+        } \
+    } while(0)
