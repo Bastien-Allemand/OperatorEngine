@@ -23,18 +23,31 @@ GameManager::~GameManager()
 	m_componants.clear();
 }
 
-void GameManager::AddEntity(UINT entity, bool hasComponant, bool hasSystem)
+Entity* GameManager::AddEntity(UINT entity, bool hasComponant, bool hasSystem)
 {
-	if (entity >= m_componants.size()) {
-		m_componants.push_back(std::vector<Componant*>()); // Ajoute une nouvelle liste de composants pour cette entité
-	} // Initialise la liste des composants pour cette entité
+	//if (entity >= m_componants.size()) {
+	//	m_componants.push_back(std::vector<Componant*>()); // Ajoute une nouvelle liste de composants pour cette entité
+	//} // Initialise la liste des composants pour cette entité
 
 	if (hasComponant)
 	{
-		m_componants.push_back(std::vector<Componant*>()); // Ajoute une nouvelle liste de composants pour cette entité
+		//m_componants.push_back(std::vector<Componant*>()); // Ajoute une nouvelle liste de composants pour cette entité
 	}
 	if (hasSystem)
 	{
 		//m_systems.push_back(System);// Ajoute une nouvelle liste de systèmes pour cette entité
+	}
+
+	Entity* entityObj = new Entity;
+	entityObj->id = std::make_pair(entity, 0); // Associe l'ID de l'entité à l'objet Entity
+	m_entities.push_back(entityObj); // Ajoute l'entité à la liste des entités
+	return entityObj;
+}
+
+void GameManager::Update()
+{
+	for (auto& system : m_systems)
+	{
+		system->Update(dt);
 	}
 }

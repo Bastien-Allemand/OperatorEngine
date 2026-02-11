@@ -33,10 +33,14 @@ using XVector = DirectX::XMVECTOR;
 
 
 
-inline Vector3f CPU_VEC3_RIGHT = { 1.0f, 0.0f, 0.0f };
-inline Vector3f CPU_VEC3_UP = { 0.0f, 1.0f, 0.0f };
-inline Vector3f CPU_VEC3_DIR = { 0.0f, 0.0f, 1.0f };
-inline Vector3f CPU_VEC3_ZERO = { 0.0f, 0.0f, 0.0f };
+inline Vector3f OPE_VEC3_RIGHT = { 1.0f, 0.0f, 0.0f };
+inline Vector3f OPE_VEC3_UP = { 0.0f, 1.0f, 0.0f };
+inline Vector3f OPE_VEC3_DIR = { 0.0f, 0.0f, 1.0f };
+inline Vector3f OPE_VEC3_ZERO = { 0.0f, 0.0f, 0.0f };
+inline Vector3f OPE_VEC3_ONE = { 1.0f, 1.0f, 1.0f };
+
+
+inline Quaternion OPE_QUAT_ZERO = { 0.0f, 0.0f, 0.0f, 1.0f };
 
 
 

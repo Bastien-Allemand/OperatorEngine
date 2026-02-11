@@ -22,7 +22,7 @@ public:
 	Quaternion quaternion;
 	Matrix4x4f rot;
 
-
+	Vector<Transform*> m_children;
 	bool wolrdNeedsUpdate;
 	bool invWolrdNeedsUpdate;
 private:
@@ -31,6 +31,7 @@ private:
 	Matrix4x4f m_invworld;
 
 public:
+	Transform();
 	Matrix4x4f& GetWorld();
 	Matrix4x4f& GetInvWorld();
 };

@@ -13,11 +13,11 @@ void System::AddEntity(UINT entity) {
     }
 }
 
-void TransformSystem::Update(const std::vector<UINT>& entities, float deltaTime)
+void TransformSystem::Update( float deltaTime)
 {
-    for (UINT i = 0; i < entities.size(); ++i) {
-        Transform& transform = m_gameManager->GetComponant<Transform>(i);
-        if (transform.id != i) continue;
+    for (Entity* entity : m_entitiesss)
+    {
+        Transform& transform = m_gameManager->GetComponant<Transform>(entity);
         
 
 		transform.position.x += 0.1f * deltaTime; // Exemple de déplacement
@@ -51,8 +51,34 @@ void TransformSystem::Update(const std::vector<UINT>& entities, float deltaTime)
         XMStoreFloat4x4(&transform.GetWorld(), w);
         transform.wolrdNeedsUpdate = true;
         transform.invWolrdNeedsUpdate = false;
-
-
-
     }
+}
+
+void TransformSystem::AddChildren(Transform& child)
+{
+    Transform& transform = m_gameManager->GetComponant<Transform>(id);
+    transform.m_children.push_back(&child);
+}
+
+void TransformSystem::AddParent(Transform& parent)
+{
+    Transform& transform = m_gameManager->GetComponant<Transform>(id);
+	parent.m_children.push_back(&transform);
+}
+
+void TransformSystem::Move()
+{
+    for (Entity* entity : m_entitiesss)
+    {
+        Transform& transform = m_gameManager->GetComponant<Transform>(entity);
+
+        
+    }
+ //   Transform& transform = m_gameManager->GetComponant<Transform>(id);
+ //   if (transform.m_children.size() > 0) {
+ //       for (Transform* child : transform.m_children) {
+ //           child->position.x += 10.1f; // Exemple de déplacement pour les enfants
+ //       }
+	//}
+	//transform.position.x += 10.1f; // Exemple de déplacement
 }

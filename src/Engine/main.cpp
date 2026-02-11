@@ -8,43 +8,33 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR cmdLine, int cmdS
 {
     GameManager* gameManager = GameManager::GetInstance();
 
-    Entity entity1;
-    entity1.id = std::make_pair(0, 1);
-	gameManager->AddEntity(entity1.id.first, true, true);
-    Entity entity2;
-    entity2.id = std::make_pair(1, 1);
-    gameManager->AddEntity(entity2.id.first, true, true);
-    Entity entity3;
-    entity3.id = std::make_pair(2, 1);
-    gameManager->AddEntity(entity3.id.first, true, true);
+	Entity* entity1 = gameManager->AddEntity(0, true, true);
+    Entity* entity2 = gameManager->AddEntity(1, true, true);
+    Entity* entity3 = gameManager->AddEntity(2, true, true);
 
-    Transform&  a = gameManager->AddComponant<Transform>(entity1.id.first);
-
-	a.position = Vector3f(1.0f, 2.0f, 3.0f);
-
-    Transform& b = gameManager->AddComponant<Transform>(entity2.id.first);
-    b.position = Vector3f(70.0f, 9.0f, -58.0f);
-
-    TransformSystem& transformSystem = gameManager->AddSystem<TransformSystem>(entity1.id.first);
-    TransformSystem& transformSystem2 = gameManager->AddSystem<TransformSystem>(entity2.id.first);
-
-    Transform& retrievedTransform1 = gameManager->GetComponant<Transform>(entity1.id.first);
+    Transform&  a = gameManager->AddComponant<Transform>(entity1);
+    Transform& b = gameManager->AddComponant<Transform>(entity2);
+    Transform& c = gameManager->AddComponant<Transform>(entity3);
 
 
-    //feu& retrievedTransformfeu1 = gameManager->GetComponant<feu>(entity1.id.first);
+    TransformSystem& transformSystem = gameManager->AddSystem<TransformSystem>(entity1);
+    TransformSystem& transformSystem2 = gameManager->AddSystem<TransformSystem>(entity2);
+    TransformSystem& transformSystem3 = gameManager->AddSystem<TransformSystem>(entity3);
 
-    Transform& retrievedTransform2 = gameManager->GetComponant<Transform>(entity2.id.first);
-    //feu& retrievedTransformfeu2 = gameManager->GetComponant<feu>(entity2.id.first);
+	//transformSystem.AddChildren(b);
 
-    TransformSystem retrievedSystem1;
+    gameManager->Update();
+    Transform& retrievedTransform1 = gameManager->GetComponant<Transform>(entity1);
+    Transform& retrievedTransform2 = gameManager->GetComponant<Transform>(entity2);
+    Transform& retrievedTransform3 = gameManager->GetComponant<Transform>(entity3);
 
-    retrievedSystem1.Update({ entity1.id.first, entity2.id.first }, 0.016f);
 
         // Test pour voir si ça marche
         std::cout << "Position X : " << retrievedTransform1.position.x << std::endl;
         //std::cout << "Position X : " << retrievedTransformfeu1.position.y << std::endl;
 
         std::cout << "Position X : " << retrievedTransform2.position.x << std::endl;
+        std::cout << "Position X : " << retrievedTransform3.position.x << std::endl;
 
 
     return 0;
