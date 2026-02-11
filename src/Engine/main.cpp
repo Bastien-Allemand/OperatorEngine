@@ -2,7 +2,7 @@
 #include "main.h"
 #include "GameManager.h"
 #include "Entity.h"
-// Assurez-vous que Transform est défini ou inclus
+// Assurez-vous que Transform est dï¿½fini ou inclus
 
 int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR cmdLine, int cmdShow)
 {
@@ -21,6 +21,7 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR cmdLine, int cmdS
     Transform&  a = gameManager->AddComponant<Transform>(entity1.id.first);
 
 	a.position = Vector3f(1.0f, 2.0f, 3.0f);
+    InputComponent& inputs = gameManager->AddComponant<InputComponent>(entity1.id.first);
 
     Transform& b = gameManager->AddComponant<Transform>(entity2.id.first);
     b.position = Vector3f(70.0f, 9.0f, -58.0f);
@@ -40,7 +41,7 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR cmdLine, int cmdS
 
     retrievedSystem1.Update({ entity1.id.first, entity2.id.first }, 0.016f);
 
-        // Test pour voir si ça marche
+        // Test pour voir si ï¿½a marche
         std::cout << "Position X : " << retrievedTransform1.position.x << std::endl;
         //std::cout << "Position X : " << retrievedTransformfeu1.position.y << std::endl;
 

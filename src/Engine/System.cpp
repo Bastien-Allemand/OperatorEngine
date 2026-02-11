@@ -20,7 +20,7 @@ void TransformSystem::Update(const std::vector<UINT>& entities, float deltaTime)
         if (transform.id != i) continue;
         
 
-		transform.position.x += 0.1f * deltaTime; // Exemple de déplacement
+		transform.position.x += 0.1f * deltaTime; // Exemple de dï¿½placement
         XVector pos = XMLoadFloat3(&transform.position);
         XVector rot = XMLoadFloat4(&transform.quaternion);
         XVector scale = XMLoadFloat3(&transform.scale);
@@ -54,5 +54,30 @@ void TransformSystem::Update(const std::vector<UINT>& entities, float deltaTime)
 
 
 
+    }
+}
+
+void InputSystem::Update(const std::vector<UINT>& entities, float deltaTime)
+{
+    InputManager* im = InputManager::GetInstance();
+    im->Update();
+
+    for (UINT id : entities)
+    {
+        try
+        {
+            InputComponent& inputComp = m_gameManager->GetComponant<InputComponent>(id);
+            if (inputComp.id != id) continue;
+            for (auto& [name, action] : inputComp.actions)
+            {
+                bool currentlyDown = im->IsKeyDown(action.keyCode);
+                bool justPressed = im->IsKeyPressed(action.keyCode);
+
+                action.isPressed = currentlyDown;
+                action.isJustPressed = justPressed;
+                action.value = currentlyDown ? 1.0f : 0.0f;
+            }
+        }
+        catch (const std::exception&) { continue; }
     }
 }

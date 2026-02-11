@@ -52,3 +52,25 @@ public:
 	Matrix4x4f world;
 };
 
+
+#pragma once
+#include "Componant.h"
+#include <string>
+#include <unordered_map>
+#include <iostream>
+
+struct InputAction
+{
+    int keyCode;
+    bool isPressed = false;    
+    bool isJustPressed = false; 
+    float value = 0.0f;
+};
+
+struct InputComponent : public Componant
+{
+    std::unordered_map<std::string, InputAction> actions;
+	void BindAction(const std::string& actionName, int key);
+	bool IsActionPressed(const std::string& actionName);
+	bool IsActionJustPressed(const std::string& actionName);
+};
