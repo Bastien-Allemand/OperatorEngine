@@ -33,17 +33,18 @@ template<typename T>
 using Vector = std::vector<T>;
 
 enum class DebugFlag {
-    Log,  
-    Warning, 
-    Error   
+    LOG,  
+    WARNING, 
+    ERROR_   
 };
 
-#define DEBUG_MESSAGE(msg, flag) \
+#define DebugMsg(msg, flag) \
     do { \
-        if (flag == DebugFlag::Error) { \ \
-            std::cerr << "[ERROR] " << msg << std::endl; \ \
+        if (flag == DebugFlag::ERROR_) { \
+            std::wcerr << L"[CRITICAL ERROR] " << msg << std::endl; \
             std::abort(); \
-        } else { \ \
-            std::cout << "[LOG] " << msg << std::endl; \
+        } else { \
+            std::wcout << L"[LOG] " << msg << std::endl; \
         } \
     } while(0)
+

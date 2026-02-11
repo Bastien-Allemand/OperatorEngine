@@ -9,8 +9,8 @@ bool PipelineStateObject::Init(ID3D12Device* _device)
 	D3D12_GRAPHICS_PIPELINE_STATE_DESC psoDesc = {};
 	// Input Layout,Vertex Shader, Pixel Shader
 	InitInputLayout(&psoDesc);
-	InitVs(&psoDesc, L"../../res/Render/Shader/DefaultShader.hlsl");
-	InitPs(&psoDesc, L"../../res/Render/Shader/DefaultShader.hlsl");
+	InitVs(&psoDesc, L"../../res/Render/Shader/DefaultShader.shader");
+	InitPs(&psoDesc, L"../../res/Render/Shader/DefaultShader.shader");
 	InitRootSig(_device);
 	psoDesc.pRootSignature = m_rootSig;
 

@@ -8,16 +8,17 @@ LRESULT CALLBACK App::WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 	switch (msg)
 	{
 	case WM_DESTROY:
+	{
 		PostQuitMessage(0);
 		break;
-
+	}
 	default:
 		return DefWindowProc(hwnd, msg, wParam, lParam);
 	}
 	return 0;
 }
 
-void App::Initialize()
+void App::Initialize(int _width,int _height)
 {
 	{  //Console for debug
 		#if defined(DEBUG) | defined(_DEBUG)
@@ -31,10 +32,10 @@ void App::Initialize()
 	}
 
 	m_window = new Window;
-	m_window->Init(800, 600, L"ENETRE", WndProc);
+	m_window->Init(_width, _height, L"ENETRE", WndProc);
 
 	m_renderEngine = new RenderEngine();
-	m_renderEngine->Init(m_window->GCwidth(),m_window->GCheight(),m_window->GHWND());
+	m_renderEngine->Init(m_window->GCWidth(),m_window->GCHeight(),m_window->GHWND());
 	
 }
 
@@ -58,7 +59,7 @@ void App::Run()
 		}
 		else
 		{
-
+			m_renderEngine->Update();
 		}
 	}
 }

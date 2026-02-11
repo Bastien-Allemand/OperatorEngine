@@ -10,6 +10,7 @@ bool Fence::Init(ID3D12Device* _device)
 		std::cout << "Failed to create fence" << std::endl;
 		return 1;
 	}
+	m_fenceValue = 0;
 	// Create an event handle to use for waiting
 	m_fenceEvent = CreateEvent(nullptr, FALSE, FALSE, nullptr);
 	return 0;

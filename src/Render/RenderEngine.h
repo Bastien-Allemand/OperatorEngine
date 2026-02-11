@@ -7,6 +7,7 @@ class RenderDevice;
 class Factory;
 class Fence;
 class Descriptors;
+class RenderTarget;
 
 class RenderEngine
 {
@@ -15,6 +16,11 @@ public:
 	~RenderEngine();
 	bool Init(int _width, int _height, HWND _handle);
 	void Update();
+	bool Resize(int _width, int _height);
+
+	bool m4xMsaaState = 0;
+	uint32 m4xMsaaQuality = 0;
+
 private:
 	Factory* m_factory = nullptr;
 
@@ -30,6 +36,11 @@ private:
 
 	Descriptors* m_desc;
 
+	RenderTarget* m_renderTarget;
+
 	Fence* m_fence = nullptr;
+
+
+	bool FlushCommandQueue();
 };
 

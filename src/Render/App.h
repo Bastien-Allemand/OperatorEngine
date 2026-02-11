@@ -6,7 +6,7 @@ class App
 {
 public:
 	App() = default;
-	void Initialize();
+	void Initialize(int _width, int _height);
 	~App();
 
 	void Run();

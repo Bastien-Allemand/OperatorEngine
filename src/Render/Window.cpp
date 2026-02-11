@@ -3,7 +3,7 @@
 
 
 
-int Window::Init(int _width, int _height, const wchar_t* _title, WNDPROC _WndProc)
+bool Window::Init(int _width, int _height, const wchar_t* _title, WNDPROC _WndProc)
 {
 	m_width = _width;
 	m_height = _height;
@@ -12,32 +12,26 @@ int Window::Init(int _width, int _height, const wchar_t* _title, WNDPROC _WndPro
     wc.lpfnWndProc = _WndProc;
     wc.hInstance = GetModuleHandle(nullptr);
     wc.lpszClassName = L"SampleWindowClass";
+    wc.hbrBackground = NULL;
     RegisterClass(&wc);
-
+    
     m_hwnd = CreateWindowEx(0,wc.lpszClassName,_title,
         WS_OVERLAPPEDWINDOW,CW_USEDEFAULT, CW_USEDEFAULT,
         _width, _height,nullptr, nullptr, 
         GetModuleHandle(nullptr), nullptr);
     if (!m_hwnd)
-        return 0;
+        return 1;
 
     ShowWindow(m_hwnd, SW_SHOW);
     UpdateWindow(m_hwnd);
-
     return 0;
 }
-
-void Window::Resize()
-{
-
-}
-
-int Window::GCwidth()
+int Window::GCWidth()
 {
 	return m_width;
 }
 
-int Window::GCheight()
+int Window::GCHeight()
 {
 	return m_height;
 }
