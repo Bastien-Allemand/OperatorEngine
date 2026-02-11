@@ -1,5 +1,7 @@
 #include "pch.h"
 #include "System.h"
+#include "InputManager.h"
+#include "Componant.h"
 
 System::System()
 {
@@ -20,7 +22,7 @@ void TransformSystem::Update(const std::vector<UINT>& entities, float deltaTime)
         if (transform.id != i) continue;
         
 
-		transform.position.x += 0.1f * deltaTime; // Exemple de déplacement
+		transform.position.x += 0.1f * deltaTime;
         XVector pos = XMLoadFloat3(&transform.position);
         XVector rot = XMLoadFloat4(&transform.quaternion);
         XVector scale = XMLoadFloat3(&transform.scale);
@@ -34,8 +36,6 @@ void TransformSystem::Update(const std::vector<UINT>& entities, float deltaTime)
         DirectX::XMStoreFloat3(&transform.up, XMVector3TransformNormal(DirectX::XMVectorSet(0, 1, 0, 0), matRot));
         DirectX::XMStoreFloat3(&transform.direction, XMVector3TransformNormal(DirectX::XMVectorSet(0, 0, 1, 0), matRot));
 
-
-        //==========================================================================
         DirectX::XMVECTOR s = XMLoadFloat3(&transform.scale);
         DirectX::XMVECTOR p = XMLoadFloat3(&transform.position);
 
@@ -54,5 +54,41 @@ void TransformSystem::Update(const std::vector<UINT>& entities, float deltaTime)
 
 
 
+    }
+}
+
+
+void InputSystem::Update(const std::vector<UINT>& entities, float deltaTime)
+{
+
+    InputManager::GetInstance()->Update();
+    InputManager* im = InputManager::GetInstance();
+
+    for (UINT id : entities)
+    {
+        try 
+        {
+            Transform& transform = m_gameManager->GetComponant<Transform>(id);
+            Input& inputComp = m_gameManager->GetComponant<Input>(id);
+
+            if (transform.id != id || inputComp.id != id) continue;
+
+            inputComp.verticalAxis = 0.0f;
+            inputComp.horizontalAxis = 0.0f;
+
+            if (im->IsKeyDown('W')) inputComp.verticalAxis += 1.0f;
+            if (im->IsKeyDown('S')) inputComp.verticalAxis -= 1.0f;
+            if (im->IsKeyDown('D')) inputComp.horizontalAxis += 1.0f;
+            if (im->IsKeyDown('A')) inputComp.horizontalAxis -= 1.0f;
+
+            float speed = 5.0f * deltaTime; 
+
+            transform.position.z += inputComp.verticalAxis * speed;
+            transform.position.x += inputComp.horizontalAxis * speed;
+        }
+        catch (const std::exception&) 
+        {
+            continue;
+        }
     }
 }

@@ -16,7 +16,7 @@ public:
     UINT id;
 protected:
     GameManager* m_gameManager;
-    std::vector<UINT> m_entities; // Liste des entités que ce système gère
+    std::vector<UINT> m_entities;
 };
 
 class TransformSystem : public System
