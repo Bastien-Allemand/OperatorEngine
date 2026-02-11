@@ -25,3 +25,10 @@ public:
     TransformSystem() = default;
     void Update(const std::vector<UINT>& entities, float deltaTime) override;
 };
+
+class InputSystem : public System
+{
+public:
+    InputSystem() = default;
+	void Update(const std::vector<UINT>& entities, float deltaTime) override;
+};

@@ -21,9 +21,9 @@ void TransformSystem::Update(const std::vector<UINT>& entities, float deltaTime)
         
 
 		transform.position.x += 0.1f * deltaTime; // Exemple de déplacement
-        Vector pos = XMLoadFloat3(&transform.position);
-        Vector scale = XMLoadFloat3(&transform.scale);
-        Vector rot = XMLoadFloat4(&transform.quaternion);
+        XVector pos = XMLoadFloat3(&transform.position);
+        XVector rot = XMLoadFloat4(&transform.quaternion);
+        XVector scale = XMLoadFloat3(&transform.scale);
         Matrix matScale = DirectX::XMMatrixScalingFromVector(scale);
         Matrix matRot = DirectX::XMMatrixRotationQuaternion(rot);
         Matrix matTrans = DirectX::XMMatrixTranslationFromVector(pos);

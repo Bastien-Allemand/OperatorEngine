@@ -35,7 +35,7 @@ public:
 	Matrix4x4f& GetInvWorld();
 };
 
-struct feu : public Componant
+struct Velocity : public Componant
 {
 public:
 

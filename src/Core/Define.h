@@ -26,7 +26,7 @@ using Quaternion = DirectX::XMFLOAT4;
 using Matrix4x4f = DirectX::XMFLOAT4X4;
 
 using Matrix = DirectX::XMMATRIX;
-using Vector = DirectX::XMVECTOR;
+using XVector = DirectX::XMVECTOR;
 
 
 

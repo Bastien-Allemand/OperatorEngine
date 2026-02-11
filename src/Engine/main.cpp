@@ -28,13 +28,6 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR cmdLine, int cmdS
     TransformSystem& transformSystem = gameManager->AddSystem<TransformSystem>(entity1.id.first);
     TransformSystem& transformSystem2 = gameManager->AddSystem<TransformSystem>(entity2.id.first);
 
-	//transformSystem.AddEntity(entity1.id.first);
-	//transformSystem.AddEntity(entity2.id.first);
-	//transformSystem.AddEntity(entity3.id.first);
-
-	//transformSystem.Update( 0.016f); // Simule une mise à jour avec un deltaTime de 16ms
-    // 4. Récupération du composant
-
     Transform& retrievedTransform1 = gameManager->GetComponant<Transform>(entity1.id.first);
 
 
@@ -47,27 +40,12 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR cmdLine, int cmdS
 
     retrievedSystem1.Update({ entity1.id.first, entity2.id.first }, 0.016f);
 
-    try {
-       
-        //Transform& retrievedTransform2 = gameManager->GetComponant<Transform>(dhgfheis.id.first);
-   //     for (auto& system : gameManager->GetSystems())
-   //     {
-			//system->Update(0.016f);
-   //     }
-
-
         // Test pour voir si ça marche
         std::cout << "Position X : " << retrievedTransform1.position.x << std::endl;
         //std::cout << "Position X : " << retrievedTransformfeu1.position.y << std::endl;
 
         std::cout << "Position X : " << retrievedTransform2.position.x << std::endl;
-       //std::cout << "Position X : " << retrievedTransformfeu2.position.y << std::endl;
-        //std::cout << "Position X : " << retrievedTransform2.position.x << std::endl;
-    }
-    catch (const std::exception& e) {
-        // Gère le cas où l'entité n'a pas ce composant
-        std::cerr << e.what() << std::endl;
-    }
+
 
     return 0;
 }
