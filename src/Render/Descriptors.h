@@ -11,7 +11,7 @@ public:
 	ID3D12DescriptorHeap* GcbvHeap() { return m_cbvheap; }
 	D3D12_CPU_DESCRIPTOR_HANDLE GdsvHandle() const { return m_dsvHeap->GetCPUDescriptorHandleForHeapStart(); }
 	D3D12_CPU_DESCRIPTOR_HANDLE GrtvHandle() const { return m_rtvHeap->GetCPUDescriptorHandleForHeapStart(); }
-	D3D12_CPU_DESCRIPTOR_HANDLE GcbvHandle() const { return m_cbvheap->GetCPUDescriptorHandleForHeapStart(); }
+	D3D12_GPU_DESCRIPTOR_HANDLE GcbvHandle() const { return m_cbvheap->GetGPUDescriptorHandleForHeapStart(); }
 	UINT GCrtvSize() { return m_rtvDescriptorSize; }
 private:
 	ID3D12DescriptorHeap* m_rtvHeap = nullptr;

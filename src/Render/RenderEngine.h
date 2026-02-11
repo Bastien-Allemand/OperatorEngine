@@ -9,6 +9,12 @@ class RenderDevice;
 class RenderTarget;
 class CommandContext;
 class PipelineStateObject;
+template<typename T>
+class ConstantBuffer;
+
+struct SceneConstantBuffer {
+	Matrix4x4f gWorldViewProj;
+};
 
 class RenderEngine
 {
@@ -43,7 +49,11 @@ private:
 
 	Vector<Mesh*> m_meshes;
 
+	ConstantBuffer<SceneConstantBuffer>* m_sceneCB = nullptr;
+
 	Mesh* m_quadMesh = nullptr;
+
+	Matrix4x4f m_world;
 
 	bool FlushCommandQueue();
 };

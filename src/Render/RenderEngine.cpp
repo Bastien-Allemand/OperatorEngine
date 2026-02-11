@@ -13,11 +13,27 @@
 #include "DirectXColors.h"
 #include "CommandContext.h"
 #include "PipelineStateObject.h"
+#include "ConstantBuffer.h"
 
 
 RenderEngine::~RenderEngine()
 {
-	//::TODO: release resources
+	if (m_renderDevice && m_renderDevice->GDevice())
+	{
+		FlushCommandQueue();
+	}
+
+	delete m_quadMesh;
+	if (m_queue) m_queue->Release();
+
+	delete m_factory;
+	delete m_renderDevice;
+	delete m_commandContext;
+	delete m_pipelineStateObject;
+	delete m_swapChain;
+	delete m_fence;
+	delete m_desc;
+	delete m_renderTarget;
 }
 
 bool RenderEngine::Init(int _width, int _height, HWND _handle)
@@ -30,6 +46,10 @@ bool RenderEngine::Init(int _width, int _height, HWND _handle)
 	m_fence = new Fence();
 	m_desc = new Descriptors();
 	m_renderTarget = new RenderTarget();
+	m_sceneCB = new ConstantBuffer<SceneConstantBuffer>();
+
+	DirectX::XMMATRIX world = DirectX::XMMatrixIdentity();
+	DirectX::XMStoreFloat4x4(&m_world, world);
 	//init factory
 	if (m_factory->InitFactory())
 	{
@@ -70,20 +90,17 @@ bool RenderEngine::Init(int _width, int _height, HWND _handle)
 	}
 
 	//init descriptor heap for render target views
-	hr = m_desc->InitRTV(m_renderDevice->GDevice());
-	if (FAILED(hr))
+	if (m_desc->InitRTV(m_renderDevice->GDevice()))
 	{
 		std::cout << "Failed to Init RTV" << std::endl;
 		return 1;
 	}
-	hr = m_desc->InitDSV(m_renderDevice->GDevice());
-	if (FAILED(hr))
+	if (m_desc->InitDSV(m_renderDevice->GDevice()))
 	{
 		std::cout << "Failed to Init DSV" << std::endl;
 		return 1;
 	}
-	hr = m_desc->InitCBV(m_renderDevice->GDevice());
-	if (FAILED(hr))
+	if (m_desc->InitCBV(m_renderDevice->GDevice()))
 	{
 		DebugMsg("Failed to Init CBV", DebugFlag::WARNING);
 	}
@@ -94,25 +111,32 @@ bool RenderEngine::Init(int _width, int _height, HWND _handle)
 		return 1;
 	}
 
-	m_fence->Init(m_renderDevice->GDevice());
+	if (m_fence->Init(m_renderDevice->GDevice()))
+	{
+		std::cout << "Failed to initialize fence" << std::endl;
+		return 1;
+	}
+
+
 
 	Resize(_width, _height);
+
+	if (m_sceneCB->Init(m_renderDevice->GDevice(), m_desc->GcbvHeap(), 0))
+	{
+		DebugMsg("Failed to initialize scene constant buffer", DebugFlag::WARNING);
+	}
 
 	Geometry geo;
 	geo.BuildQuad();
 	m_quadMesh = new Mesh(geo);
 	m_quadMesh->Upload(m_renderDevice->GDevice(), m_commandContext->GCommandList());
 
-	// ... après m_quadMesh->Upload ...
 
-// 1. Fermer et exécuter l'upload
+
 	m_commandContext->CloseAndExecute(m_queue);
 
-	// 2. Attendre que le GPU ait fini de copier les données
 	FlushCommandQueue();
 
-	// 3. IMPORTANT : Préparer la liste pour le premier Update()
-	// Sinon le premier Reset() dans Update() pourrait échouer ou être incohérent
 	m_commandContext->GCommandAllocator()->Reset();
 	m_commandContext->GCommandList()->Reset(m_commandContext->GCommandAllocator(), nullptr);
 
@@ -121,35 +145,41 @@ bool RenderEngine::Init(int _width, int _height, HWND _handle)
 void RenderEngine::Update()
 {
 	m_commandContext->GCommandAllocator()->Reset();
-	m_commandContext->GCommandList()->Reset(m_commandContext->GCommandAllocator(), m_pipelineStateObject->GPipelineState());
+
+	auto list = m_commandContext->GCommandList();
+
+	list->Reset(m_commandContext->GCommandAllocator(), m_pipelineStateObject->GPipelineState());
+
+	list->RSSetViewports(1, &m_swapChain->GViewport());
+	list->RSSetScissorRects(1, &m_swapChain->GScissorRect());
 
 	auto barrier = CD3DX12_RESOURCE_BARRIER::Transition(m_renderTarget->GCurrentBackBuffer(), D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET);
-	m_commandContext->GCommandList()->ResourceBarrier(1, &barrier);
+	list->ResourceBarrier(1, &barrier);
 
-	m_commandContext->GCommandList()->RSSetViewports(1, &m_swapChain->GViewport());
-	m_commandContext->GCommandList()->RSSetScissorRects(1, &m_swapChain->GScissorRect());
+	list->ClearRenderTargetView(m_renderTarget->GCurrentBackBufferView(m_desc->GrtvHeap(), m_desc->GCrtvSize()), DirectX::Colors::DarkRed, 0, nullptr);
+	list->ClearDepthStencilView(m_desc->GdsvHandle(), D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.f, 0, 0, nullptr);
 
 	D3D12_CPU_DESCRIPTOR_HANDLE rtvHandle = m_renderTarget->GCurrentBackBufferView(m_desc->GrtvHeap(), m_desc->GCrtvSize());
 	auto dsvHandle = m_desc->GdsvHandle();
-
-
-	m_commandContext->GCommandList()->OMSetRenderTargets(1, &rtvHandle, true, &dsvHandle);
-
-	m_commandContext->GCommandList()->ClearRenderTargetView(m_renderTarget->GCurrentBackBufferView(m_desc->GrtvHeap(), m_desc->GCrtvSize()), DirectX::Colors::DarkRed, 0, nullptr);
-	m_commandContext->GCommandList()->ClearDepthStencilView(m_desc->GdsvHandle(), D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.f, 0, 0, nullptr);
-
+	list->OMSetRenderTargets(1, &rtvHandle, true, &dsvHandle);
 
 	ID3D12DescriptorHeap* descriptorHeaps[] = { m_desc->GcbvHeap()};
-	m_commandContext->GCommandList()->SetDescriptorHeaps(_countof(descriptorHeaps), descriptorHeaps);
-	m_commandContext->GCommandList()->SetGraphicsRootSignature(m_pipelineStateObject->GRootSig());
+	list->SetDescriptorHeaps(_countof(descriptorHeaps), descriptorHeaps);
 
+	SceneConstantBuffer cb;
 
-	m_commandContext->GCommandList()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	list->SetGraphicsRootSignature(m_pipelineStateObject->GRootSig());
+
+	cb.gWorldViewProj = m_world;
+	m_sceneCB->Update(cb);
+	//m_commandContext->GCommandList()->SetGraphicsRootDescriptorTable(0, m_sceneCB->GpuHandle());
 
 	if (m_quadMesh)
 	{
-		m_quadMesh->Bind(m_commandContext->GCommandList());
-		m_commandContext->GCommandList()->DrawIndexedInstanced(m_quadMesh->GetIndexCount(), 1, 0, 0, 0);
+		m_quadMesh->Bind(list);
+		list->SetGraphicsRootConstantBufferView(0, m_sceneCB->GetAddress());
+		list->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+		list->DrawIndexedInstanced(m_quadMesh->GetIndexCount(), 1, 0, 0, 0);
 	}
 
 	//int i = 0;
@@ -171,19 +201,19 @@ void RenderEngine::Update()
 	
 
 	barrier = CD3DX12_RESOURCE_BARRIER::Transition(m_renderTarget->GCurrentBackBuffer(), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT);
-	m_commandContext->GCommandList()->ResourceBarrier(1, &barrier);
+	list->ResourceBarrier(1, &barrier);
 
 	m_commandContext->CloseAndExecute(m_queue);
 
-	HRESULT hr = m_swapChain->GSwapChain()->Present(0, 0);
+	HRESULT hr = m_swapChain->GSwapChain()->Present(1, 0);
 	if (FAILED(hr)) {
 		if (hr == DXGI_ERROR_DEVICE_REMOVED) {
 			HRESULT reason = m_renderDevice->GDevice()->GetDeviceRemovedReason();
 			std::cout << "Device Removed! Reason: " << std::hex << reason << std::endl;
 		}
 	}
-
 	m_renderTarget->SwapBuffers();
+
 
 	FlushCommandQueue();
 

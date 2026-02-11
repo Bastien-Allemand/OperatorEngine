@@ -33,7 +33,6 @@ bool PipelineStateObject::Init(ID3D12Device* _device)
 
 	return 0;
 }
-
 bool PipelineStateObject::InitRootSig(ID3D12Device* _device)
 {
 	CD3DX12_ROOT_PARAMETER rootParameters[1];
@@ -92,13 +91,12 @@ bool PipelineStateObject::InitPs(D3D12_GRAPHICS_PIPELINE_STATE_DESC* _desc, cons
 
 bool PipelineStateObject::InitInputLayout(D3D12_GRAPHICS_PIPELINE_STATE_DESC* _desc)
 {
-	m_inputLayout =
-	{
-		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
-		{ "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 12, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
-		{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 24, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 }
+	m_inputLayout = {
+		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0,  D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
+		{ "NORMAL",   0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 12, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 }, // Offset 12 (3 * 4 octets)
+		{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT,    0, 24, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 }  // Offset 24 (12 + 12)
 	};
-	_desc->InputLayout = { m_inputLayout.data(), (UINT)m_inputLayout.size() };
 
-	return 0;
+	_desc->InputLayout = { m_inputLayout.data(), (UINT)m_inputLayout.size() };
+	return true;
 }
