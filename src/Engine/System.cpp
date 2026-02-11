@@ -57,38 +57,27 @@ void TransformSystem::Update(const std::vector<UINT>& entities, float deltaTime)
     }
 }
 
-
 void InputSystem::Update(const std::vector<UINT>& entities, float deltaTime)
 {
-
-    InputManager::GetInstance()->Update();
     InputManager* im = InputManager::GetInstance();
+    im->Update();
 
     for (UINT id : entities)
     {
-        try 
+        try
         {
-            Transform& transform = m_gameManager->GetComponant<Transform>(id);
-            Input& inputComp = m_gameManager->GetComponant<Input>(id);
+            InputComponent& inputComp = m_gameManager->GetComponant<InputComponent>(id);
+            if (inputComp.id != id) continue;
+            for (auto& [name, action] : inputComp.actions)
+            {
+                bool currentlyDown = im->IsKeyDown(action.keyCode);
+                bool justPressed = im->IsKeyPressed(action.keyCode);
 
-            if (transform.id != id || inputComp.id != id) continue;
-
-            inputComp.verticalAxis = 0.0f;
-            inputComp.horizontalAxis = 0.0f;
-
-            if (im->IsKeyDown('W')) inputComp.verticalAxis += 1.0f;
-            if (im->IsKeyDown('S')) inputComp.verticalAxis -= 1.0f;
-            if (im->IsKeyDown('D')) inputComp.horizontalAxis += 1.0f;
-            if (im->IsKeyDown('A')) inputComp.horizontalAxis -= 1.0f;
-
-            float speed = 5.0f * deltaTime; 
-
-            transform.position.z += inputComp.verticalAxis * speed;
-            transform.position.x += inputComp.horizontalAxis * speed;
+                action.isPressed = currentlyDown;
+                action.isJustPressed = justPressed;
+                action.value = currentlyDown ? 1.0f : 0.0f;
+            }
         }
-        catch (const std::exception&) 
-        {
-            continue;
-        }
+        catch (const std::exception&) { continue; }
     }
 }
