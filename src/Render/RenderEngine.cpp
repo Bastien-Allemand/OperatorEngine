@@ -2,15 +2,17 @@
 #include "RenderEngine.h"
 #include "d3dx12.h"
 
-#include "Factory.h"
-#include "RenderDevice.h"
-#include "CommandContext.h"
-#include "PipelineStateObject.h"
-#include "SwapChain.h"
+#include "Mesh.h"
 #include "Fence.h"
+#include "Factory.h"
+#include "Geometry.h"
+#include "SwapChain.h"
 #include "Descriptors.h"
+#include "RenderDevice.h"
 #include "RenderTarget.h"
 #include "DirectXColors.h"
+#include "CommandContext.h"
+#include "PipelineStateObject.h"
 
 
 RenderEngine::~RenderEngine()
@@ -96,16 +98,23 @@ bool RenderEngine::Init(int _width, int _height, HWND _handle)
 
 	Resize(_width, _height);
 
-	// Create a RTV for each frame.
-	// todo after RenderTargets are created
-	//for (UINT i = 0; i < 2; i++)
-	//{
-	//	m_swapChain->GSwapChain()->GetBuffer(i, IID_PPV_ARGS(&m_renderTargets[i]));
+	Geometry geo;
+	geo.BuildQuad();
+	m_quadMesh = new Mesh(geo);
+	m_quadMesh->Upload(m_renderDevice->GDevice(), m_commandContext->GCommandList());
 
-	//	m_renderDevice->GDevice()->CreateRenderTargetView(m_renderTargets[i], nullptr, rtvHandle);
+	// ... après m_quadMesh->Upload ...
 
-	//	rtvHandle.Offset(1, m_rtvDescriptorSize);
-	//}
+// 1. Fermer et exécuter l'upload
+	m_commandContext->CloseAndExecute(m_queue);
+
+	// 2. Attendre que le GPU ait fini de copier les données
+	FlushCommandQueue();
+
+	// 3. IMPORTANT : Préparer la liste pour le premier Update()
+	// Sinon le premier Reset() dans Update() pourrait échouer ou être incohérent
+	m_commandContext->GCommandAllocator()->Reset();
+	m_commandContext->GCommandList()->Reset(m_commandContext->GCommandAllocator(), nullptr);
 
 }
 
@@ -124,18 +133,39 @@ void RenderEngine::Update()
 	auto dsvHandle = m_desc->GdsvHandle();
 
 
+	m_commandContext->GCommandList()->OMSetRenderTargets(1, &rtvHandle, true, &dsvHandle);
 
-	m_commandContext->GCommandList()->ClearRenderTargetView(m_renderTarget->GCurrentBackBufferView(m_desc->GrtvHeap(), m_desc->GCrtvSize()), DirectX::Colors::BlueViolet, 0, nullptr);
+	m_commandContext->GCommandList()->ClearRenderTargetView(m_renderTarget->GCurrentBackBufferView(m_desc->GrtvHeap(), m_desc->GCrtvSize()), DirectX::Colors::DarkRed, 0, nullptr);
 	m_commandContext->GCommandList()->ClearDepthStencilView(m_desc->GdsvHandle(), D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.f, 0, 0, nullptr);
 
-	m_commandContext->GCommandList()->OMSetRenderTargets(1, &rtvHandle, FALSE, &dsvHandle);
 
 	ID3D12DescriptorHeap* descriptorHeaps[] = { m_desc->GcbvHeap()};
 	m_commandContext->GCommandList()->SetDescriptorHeaps(_countof(descriptorHeaps), descriptorHeaps);
 	m_commandContext->GCommandList()->SetGraphicsRootSignature(m_pipelineStateObject->GRootSig());
 
 
-	
+	m_commandContext->GCommandList()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+	if (m_quadMesh)
+	{
+		m_quadMesh->Bind(m_commandContext->GCommandList());
+		m_commandContext->GCommandList()->DrawIndexedInstanced(m_quadMesh->GetIndexCount(), 1, 0, 0, 0);
+	}
+
+	//int i = 0;
+	//for (auto* mesh : m_meshes)
+	//{
+	//	mesh->Upload(m_renderDevice->GDevice(), m_commandContext->GCommandList()); // Propre !
+	//	mesh->Bind(m_commandContext->GCommandList()); // Propre !
+
+	//	// On dessine : 6 indices pour les 2 triangles du quad
+	//	m_commandContext->GCommandList()->DrawIndexedInstanced(mesh->GetIndexCount(), 1, 0, 0, 0);
+	//	
+	//	m_meshes.erase(m_meshes.begin() + i);
+	//	mesh = nullptr;
+	//	i++;
+	//}
+
 	//D3D12_GPU_VIRTUAL_ADDRESS cbvAddress;
 	//cbvAddress
 	
@@ -156,6 +186,8 @@ void RenderEngine::Update()
 	m_renderTarget->SwapBuffers();
 
 	FlushCommandQueue();
+
+
 }
 
 bool RenderEngine::Resize(int _width, int _height)

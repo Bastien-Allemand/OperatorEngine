@@ -1,13 +1,14 @@
 #pragma once
 
+class Mesh;
+class Fence;
+class Factory;
+class SwapChain;
+class Descriptors;
+class RenderDevice;
+class RenderTarget;
 class CommandContext;
 class PipelineStateObject;
-class SwapChain;
-class RenderDevice;
-class Factory;
-class Fence;
-class Descriptors;
-class RenderTarget;
 
 class RenderEngine
 {
@@ -17,7 +18,7 @@ public:
 	bool Init(int _width, int _height, HWND _handle);
 	void Update();
 	bool Resize(int _width, int _height);
-
+	void AddMeshToDraw(Mesh* _mesh) { m_meshes.push_back(_mesh); }
 	bool m4xMsaaState = 0;
 	uint32 m4xMsaaQuality = 0;
 
@@ -40,6 +41,9 @@ private:
 
 	Fence* m_fence = nullptr;
 
+	Vector<Mesh*> m_meshes;
+
+	Mesh* m_quadMesh = nullptr;
 
 	bool FlushCommandQueue();
 };

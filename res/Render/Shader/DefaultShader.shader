@@ -5,8 +5,9 @@ cbuffer cb : register(b0)
 
 struct VertexIn
 {
-    float3 pos : POSITION;
-    float4 color : COLOR;
+    float3 pos    : POSITION;
+    float3 normal : NORMAL;  
+    float2 uv     : TEXCOORD;
 };
 
 struct VertexOut
@@ -18,8 +19,8 @@ struct VertexOut
 VertexOut VS(VertexIn vin)
 {
     VertexOut vout;
-    vout.pos = mul(float4(vin.pos, 1.0f),gWorldViewProj);
-    vout.color = vin.color;
+    vout.pos = float4(vin.pos, 1.0f); // On ignore la matrice !
+    vout.color = float4(1.0f, 1.0f, 0.0f, 1.0f); // Jaune fluo pour être sûr
     return vout;
 }
 float4 PS(VertexOut pin) : SV_Target
