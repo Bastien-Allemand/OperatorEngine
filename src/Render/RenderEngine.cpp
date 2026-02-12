@@ -199,13 +199,16 @@ void RenderEngine::Update(float dt)
 	list->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
 	int i = 0;
-	for (auto* mesh : m_meshes)
-	{
-		mesh->Upload(m_renderDevice->GDevice(), m_commandContext->GCommandList()); 
-		mesh->Bind(m_commandContext->GCommandList());
-		i++;
-		m_commandContext->GCommandList()->DrawIndexedInstanced(mesh->GetIndexCount(), m_meshes.size(), 0, 0, 0);
-	}
+
+	m_quadMesh->Bind(m_commandContext->GCommandList());
+	list->DrawIndexedInstanced(m_quadMesh->GetIndexCount(), 1, 0, 0, 0);
+
+	//for (auto* mesh : m_meshes)
+	//{
+	//	mesh->Upload(m_renderDevice->GDevice(), m_commandContext->GCommandList()); 
+	//	mesh->Bind(m_commandContext->GCommandList());
+	//	i++;
+	//}
 
 	barrier = CD3DX12_RESOURCE_BARRIER::Transition(m_renderTarget->GCurrentBackBuffer(), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT);
 	list->ResourceBarrier(1, &barrier);
@@ -222,9 +225,7 @@ void RenderEngine::Update(float dt)
 	m_renderTarget->SwapBuffers();
 
 
-	//FlushCommandQueue();
-
-
+	FlushCommandQueue();
 }
 
 void RenderEngine::Draw()
