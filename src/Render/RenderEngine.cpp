@@ -231,7 +231,7 @@ bool RenderEngine::Resize(int _width, int _height)
 	m_swapChain->GScissorRect()->right = _width;
 	m_swapChain->GScissorRect()->bottom = _height;
 
-
+	return 0;
 }
 
 void RenderEngine::AddMeshToDraw(Mesh* _mesh)
