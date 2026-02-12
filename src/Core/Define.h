@@ -4,6 +4,7 @@
 #include <vector>
 #include <iostream>
 #include <cstdlib>
+#include <map>
 
 using int8 = __int8;
 using int16 = __int16;
@@ -40,6 +41,8 @@ using WString = std::wstring;
 
 template<typename T>
 using Vector = std::vector<T>;
+template<typename T>
+using CharMap = std::map<char, T>;
 
 enum class DebugFlag {
     Info,
