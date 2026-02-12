@@ -5,7 +5,7 @@
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR cmdLine, int cmdShow)
 {
 	App app;
-	app.Initialize();
+	app.Initialize(800,600);
 	app.Run();
 
     return 0;

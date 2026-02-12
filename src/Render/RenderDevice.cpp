@@ -11,7 +11,7 @@ bool RenderDevice::Init(Factory* _factory)
 {
 	if (_factory == nullptr)	
 	{
-		std::cout << "Factory Required" << std::endl;
+		Log(true, "Factory is null, cannot initialize RenderDevice");
 		return 1;
 	}
 	HRESULT hr = D3D12CreateDevice(nullptr, D3D_FEATURE_LEVEL_11_0, IID_PPV_ARGS(&m_device));
@@ -22,13 +22,13 @@ bool RenderDevice::Init(Factory* _factory)
 		{
 			if (hr = D3D12CreateDevice(_factory->GAdapter(), D3D_FEATURE_LEVEL_11_0, IID_PPV_ARGS(&m_device)));//pray this works ig
 			{
-				std::cout << "Device creation failed" << std::endl;
+				Log(true, "Failed to create D3D12 device with adapter, trying without adapter");
 				return 1;
 			}
 		}
 		else
 		{
-			std::cout << "Failed to find compatible adapter" << std::endl;
+			Log(true, "Failed to find compatible adapter")
 			return 1;
 		}
 	}
