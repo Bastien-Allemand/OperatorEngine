@@ -8,6 +8,7 @@
 #include "d3dcompiler.h"
 #include "DirectXMath.h"
 #include "../Core/Define.h"
+#include "../Core/Transform.h"
 
 #pragma comment(lib,"d3dcompiler.lib")
 #pragma comment(lib, "D3D12.lib")
