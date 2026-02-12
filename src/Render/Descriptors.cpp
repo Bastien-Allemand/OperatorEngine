@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "Descriptors.h"
 
+
 bool Descriptors::InitRTV(ID3D12Device* _device)
 {
 	D3D12_DESCRIPTOR_HEAP_DESC rtvHeapDesc = {};
