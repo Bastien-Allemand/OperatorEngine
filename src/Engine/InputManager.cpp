@@ -5,7 +5,7 @@ InputManager* InputManager::m_instance = nullptr;
 
 InputManager::InputManager()
 {
-    DEBUG_MESSAGE(L"InputManager Singleton Created", DebugFlag::Info);
+    DebugMsg(L"InputManager Singleton Created", DebugFlag::LOG);
 }
 
 InputManager* InputManager::GetInstance()
@@ -23,11 +23,11 @@ void InputManager::Init(HWND hwnd)
 
     if (m_hwnd == nullptr)
     {
-        DEBUG_MESSAGE(L"InputManager Init called with NULL HWND. Mouse coords will be Screen Space", DebugFlag::Warning);
+        DebugMsg(L"InputManager Init called with NULL HWND. Mouse coords will be Screen Space", DebugFlag::WARNING);
     }
     else
     {
-        DEBUG_MESSAGE(L"InputManager Initialized successfully.", DebugFlag::Info);
+        DebugMsg(L"InputManager Initialized successfully.", DebugFlag::LOG);
     }
 }
 
@@ -50,7 +50,7 @@ void InputManager::Update()
     }
     else
     {
-        DEBUG_MESSAGE(L"Failed to retrieve Cursor Position", DebugFlag::Warning); 
+        DebugMsg(L"Failed to retrieve Cursor Position", DebugFlag::WARNING);
     }
 
     for (auto const& [key, val] : m_keyState)
