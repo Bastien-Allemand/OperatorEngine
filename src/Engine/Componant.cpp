@@ -13,28 +13,28 @@ Matrix4x4f& Transform::GetInvWorld()
 	// TODO: insérer une instruction return ici
 }
 
-void InputComponent::BindAction(const std::string& actionName, int key)
+void InputComponent::BindAction(const std::string& _actionName, int key)
 {
-    actions[actionName].keyCode = key;
-    actions[actionName].isPressed = false;
-    actions[actionName].isJustPressed = false;
-    actions[actionName].value = 0.0f;
+    actions[_actionName].keyCode = key;
+    actions[_actionName].isPressed = false;
+    actions[_actionName].isJustPressed = false;
+    actions[_actionName].value = 0.0f;
 }
 
-bool InputComponent::IsActionPressed(const std::string& actionName)
+bool InputComponent::IsActionPressed(const std::string& _actionName)
 {
-    if (actions.find(actionName) != actions.end())
+    if (actions.find(_actionName) != actions.end())
     {
-        return actions.at(actionName).isPressed;
+        return actions.at(_actionName).isPressed;
     }
     return false;
 }
 
-bool InputComponent::IsActionJustPressed(const std::string& actionName)
+bool InputComponent::IsActionJustPressed(const std::string& _actionName)
 {
-    if (actions.find(actionName) != actions.end())
+    if (actions.find(_actionName) != actions.end())
     {
-        return actions.at(actionName).isJustPressed;
+        return actions.at(_actionName).isJustPressed;
     }
     return false;
 }

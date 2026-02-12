@@ -1,0 +1,87 @@
+cbuffer cbPerObject : register(b0)
+{
+    float4x4 gworld;
+	float4x4 gviewProj; 
+};
+struct DirectionalLight
+{
+    float4 Ambient;
+    float4 Diffuse;
+    float4 Specular;
+    float3 Direction;
+    float Pad;
+};
+cbuffer cbPass : register(b1)
+{
+    DirectionalLight gDirLight;
+    float3 gEyePosW;
+    float cbPad;    
+};
+struct VertexIn
+{
+    float3 PosL : POSITION;
+    float3 NormalL : NORMAL;
+    float2 TexC : TEXCOORD;
+};
+
+struct VertexOut
+{
+	float4 PosH  : SV_POSITION;
+    float3 PosW : POSITION;
+    float3 NormalW : NORMAL;
+};
+
+VertexOut VS(VertexIn vin)
+{
+    VertexOut vout;
+
+    // 1. Position mondiale (nécessaire pour la lumière et le spéculaire)
+    float4 posW = mul(float4(vin.PosL, 1.0f), gworld);
+    vout.PosW = posW.xyz;
+
+    // 2. Transformation vers l'écran (Projection sur le résultat du monde)
+    // On multiplie la position MONDE par la matrice ViewProj
+    vout.PosH = mul(posW, gviewProj);
+
+    // 3. Transformation de la normale
+    vout.NormalW = mul(vin.NormalL, (float3x3)gworld);
+    
+    return vout;
+}
+
+float4 PS(VertexOut pin) : SV_Target
+{
+    pin.NormalW = normalize(pin.NormalW);
+
+    // --- AMBIENT ---
+    float4 ambient = gDirLight.Ambient;
+
+    // --- DIFFUSE ---
+    float3 lightVec = -gDirLight.Direction;
+    float diffuseFactor = max(dot(lightVec, pin.NormalW), 0.0f);
+    float4 diffuse = diffuseFactor * gDirLight.Diffuse;
+
+    // --- SPECULAR ---
+    float4 spec = float4(0.0f, 0.0f, 0.0f, 0.0f);
+    
+    if(diffuseFactor > 0.0f) // On ne calcule le spéculaire que si la face est éclairée
+    {
+        // Vecteur de la surface vers la caméra
+        float3 toEye = normalize(gEyePosW - pin.PosW);
+        
+        // Vecteur de réflexion (modèle Phong)
+        float3 r = reflect(gDirLight.Direction, pin.NormalW);
+        
+        // Calcul du facteur spéculaire
+        // Le "pow(..., 16.0f)" contrôle la taille du reflet (plus c'est haut, plus c'est petit/brillant)
+        float specFactor = pow(max(dot(r, toEye), 0.0f), 16.0f);
+        
+        spec = specFactor * gDirLight.Specular;
+    }
+
+    // --- COMBINAISON FINALE ---
+    float4 finalColor = ambient + diffuse + spec;
+    finalColor.a = 1.0f;
+
+    return finalColor;
+}
