@@ -2,32 +2,30 @@
 #include "main.h"
 #include "GameManager.h"
 #include "Entity.h"
-#include "GameTransform.h"
 // Assurez-vous que Transform est défini ou inclus
 
 int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR cmdLine, int cmdShow)
 {
     GameManager* gameManager = GameManager::GetInstance();
 
-	Entity* entity1 = gameManager->AddEntity(0, true, true);
-    Entity* entity2 = gameManager->AddEntity(1, true, true);
-    Entity* entity3 = gameManager->AddEntity(2, true, true);
+	Entity* entity1 = gameManager->AddEntity(0);
+    Entity* entity2 = gameManager->AddEntity(1);
+    Entity* entity3 = gameManager->AddEntity(2);
 
-    Transform&  a = gameManager->AddComponant<Transform>(entity1);
-    Transform& b = gameManager->AddComponant<Transform>(entity2);
-    Transform& c = gameManager->AddComponant<Transform>(entity3);
+    TransformComponant&  a = gameManager->AddComponant<TransformComponant>(entity1);
+    TransformComponant& b = gameManager->AddComponant<TransformComponant>(entity2);
+    TransformComponant& c = gameManager->AddComponant<TransformComponant>(entity3);
 
+    entity1->AddChild(entity2);
 
     TransformSystem& transformSystem = gameManager->AddSystem<TransformSystem>(entity1);
     TransformSystem& transformSystem2 = gameManager->AddSystem<TransformSystem>(entity2);
     TransformSystem& transformSystem3 = gameManager->AddSystem<TransformSystem>(entity3);
 
-	transformSystem.AddChildren(entity2, entity3);
-    transformSystem.Move();
     gameManager->Update();
-    Transform& retrievedTransform1 = gameManager->GetComponant<Transform>(entity1);
-    Transform& retrievedTransform2 = gameManager->GetComponant<Transform>(entity2);
-    Transform& retrievedTransform3 = gameManager->GetComponant<Transform>(entity3);
+    TransformComponant& retrievedTransform1 = gameManager->GetComponant<TransformComponant>(entity1);
+    TransformComponant& retrievedTransform2 = gameManager->GetComponant<TransformComponant>(entity2);
+    TransformComponant& retrievedTransform3 = gameManager->GetComponant<TransformComponant>(entity3);
 
 
         // Test pour voir si ça marche
