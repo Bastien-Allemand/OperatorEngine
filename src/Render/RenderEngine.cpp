@@ -50,6 +50,8 @@ bool RenderEngine::Init(int _width, int _height, HWND _handle)
 
 	DirectX::XMMATRIX world = DirectX::XMMatrixIdentity();
 	DirectX::XMStoreFloat4x4(&m_world, world);
+	DirectX::XMStoreFloat4x4(&m_view, world);
+	DirectX::XMStoreFloat4x4(&m_proj, world);
 	//init factory
 	if (m_factory->InitFactory())
 	{
@@ -126,8 +128,11 @@ bool RenderEngine::Init(int _width, int _height, HWND _handle)
 		DebugMsg("Failed to initialize scene constant buffer", DebugFlag::WARNING);
 	}
 
+	m_commandContext->GCommandAllocator()->Reset();
+	m_commandContext->GCommandList()->Reset(m_commandContext->GCommandAllocator(), nullptr);
+
 	Geometry geo;
-	geo.BuildQuad();
+	geo.BuildBox();
 	m_quadMesh = new Mesh(geo);
 	m_quadMesh->Upload(m_renderDevice->GDevice(), m_commandContext->GCommandList());
 
@@ -137,18 +142,37 @@ bool RenderEngine::Init(int _width, int _height, HWND _handle)
 
 	FlushCommandQueue();
 
-	m_commandContext->GCommandAllocator()->Reset();
-	m_commandContext->GCommandList()->Reset(m_commandContext->GCommandAllocator(), nullptr);
+
 
 }
 
 void RenderEngine::Update()
 {
-	m_commandContext->GCommandAllocator()->Reset();
+	float x = mRadius * sinf(mPhi) * cosf(mTheta);
+	float z = mRadius * sinf(mPhi) * sinf(mTheta);
+	float y = mRadius * cosf(mPhi);
+	DirectX::XMVECTOR pos = DirectX::XMVectorSet(x, y, z, 1.0f);
+	DirectX::XMVECTOR target = DirectX::XMVectorZero();
+	DirectX::XMVECTOR up = DirectX::XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
+	DirectX::XMMATRIX view = DirectX::XMMatrixLookAtLH(pos, target, up);
+
+	DirectX::XMStoreFloat4x4(&m_view, view);
+	DirectX::XMMATRIX world = XMLoadFloat4x4(&m_world);
+
+	world = world * DirectX::XMMatrixRotationZ(0.001f);
+	world = world * DirectX::XMMatrixRotationY(0.001f);
+	world = world * DirectX::XMMatrixRotationX(0.001f);
+	DirectX::XMStoreFloat4x4(&m_world, world);
+	DirectX::XMMATRIX proj = XMLoadFloat4x4(&m_proj);
+	SceneConstantBuffer cb;
+	DirectX::XMMATRIX worldViewProj = world * view * proj;
+	XMStoreFloat4x4(&cb.gWorldViewProj, XMMatrixTranspose(worldViewProj));
+
+	m_sceneCB->CopyData(0,cb);
 
 	auto list = m_commandContext->GCommandList();
-
-	list->Reset(m_commandContext->GCommandAllocator(), m_pipelineStateObject->GPipelineState());
+	m_commandContext->GCommandAllocator()->Reset();
+	list->Reset(m_commandContext->GCommandAllocator(), nullptr);
 
 	list->RSSetViewports(1, &m_swapChain->GViewport());
 	list->RSSetScissorRects(1, &m_swapChain->GScissorRect());
@@ -156,30 +180,29 @@ void RenderEngine::Update()
 	auto barrier = CD3DX12_RESOURCE_BARRIER::Transition(m_renderTarget->GCurrentBackBuffer(), D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET);
 	list->ResourceBarrier(1, &barrier);
 
-	list->ClearRenderTargetView(m_renderTarget->GCurrentBackBufferView(m_desc->GrtvHeap(), m_desc->GCrtvSize()), DirectX::Colors::DarkRed, 0, nullptr);
+	list->ClearRenderTargetView(m_renderTarget->GCurrentBackBufferView(m_desc->GrtvHeap(), m_desc->GCrtvSize()), DirectX::Colors::Aquamarine, 0, nullptr);
 	list->ClearDepthStencilView(m_desc->GdsvHandle(), D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.f, 0, 0, nullptr);
 
 	D3D12_CPU_DESCRIPTOR_HANDLE rtvHandle = m_renderTarget->GCurrentBackBufferView(m_desc->GrtvHeap(), m_desc->GCrtvSize());
 	auto dsvHandle = m_desc->GdsvHandle();
-	list->OMSetRenderTargets(1, &rtvHandle, true, &dsvHandle);
+	list->OMSetRenderTargets(1, &rtvHandle, FALSE, &dsvHandle);
 
 	ID3D12DescriptorHeap* descriptorHeaps[] = { m_desc->GcbvHeap()};
 	list->SetDescriptorHeaps(_countof(descriptorHeaps), descriptorHeaps);
 
-	SceneConstantBuffer cb;
-
 	list->SetGraphicsRootSignature(m_pipelineStateObject->GRootSig());
 
-	cb.gWorldViewProj = m_world;
-	m_sceneCB->Update(cb);
+	list->SetPipelineState(m_pipelineStateObject->GPipelineState());
+
+
 	//m_commandContext->GCommandList()->SetGraphicsRootDescriptorTable(0, m_sceneCB->GpuHandle());
 
 	if (m_quadMesh)
 	{
 		m_quadMesh->Bind(list);
-		list->SetGraphicsRootConstantBufferView(0, m_sceneCB->GetAddress());
 		list->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-		list->DrawIndexedInstanced(m_quadMesh->GetIndexCount(), 1, 0, 0, 0);
+		list->SetGraphicsRootConstantBufferView(0, m_sceneCB->GetAddress());
+		list->DrawIndexedInstanced(m_quadMesh->DrawArgs["box"].IndexCount, 1, 0, 0, 0);
 	}
 
 	//int i = 0;
@@ -222,7 +245,8 @@ void RenderEngine::Update()
 
 bool RenderEngine::Resize(int _width, int _height)
 {
-	FlushCommandQueue();
+	DirectX::XMMATRIX proj = DirectX::XMMatrixPerspectiveFovLH(0.25f * DirectX::XM_PI, static_cast<float>(_width) / _height, 0.1f, 1000.0f);
+	DirectX::XMStoreFloat4x4(&m_proj, proj);
 
 	m_commandContext->GCommandList()->Reset(m_commandContext->GCommandAllocator(), nullptr);
 	for (int i = 0; i < m_renderTarget->GCBufferCount(); i++)

@@ -22,68 +22,97 @@ void Mesh::Upload(ID3D12Device* _rd, ID3D12GraphicsCommandList* _list)
 
 void Mesh::Bind(ID3D12GraphicsCommandList* _list)
 {
+	D3D12_VERTEX_BUFFER_VIEW vbv;
+	vbv.BufferLocation = m_vGPUBuffer->GetGPUVirtualAddress();
+	vbv.StrideInBytes = VertexByteStride;
+	vbv.SizeInBytes = VertexBufferByteSize;
+
+	D3D12_INDEX_BUFFER_VIEW ibv;
+	ibv.BufferLocation = m_iGPUBuffer->GetGPUVirtualAddress();
+	ibv.Format = IndexFormat;
+	ibv.SizeInBytes = IndexBufferByteSize;
+
 	// On lie les sommets
-	_list->IASetVertexBuffers(0, 1, &m_vbView);
+	_list->IASetVertexBuffers(0, 1, &vbv);
 	// On lie les indices
-	_list->IASetIndexBuffer(&m_ibView);
+	_list->IASetIndexBuffer(&ibv);
 }
 
 void Mesh::UploadIndex(ID3D12Device* _rd, ID3D12GraphicsCommandList* _list)
 {
-	const uint32 iBufferSize = static_cast<uint32>(m_geo.indices.size() * sizeof(uint32));
+	const UINT ibByteSize = (UINT)m_geo.indices.size() * sizeof(uint32);
+	D3DCreateBlob(ibByteSize, &m_iBuffer);
 
-	auto defaultProp = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT);
-	auto iDesc = CD3DX12_RESOURCE_DESC::Buffer(iBufferSize);
-	_rd->CreateCommittedResource(&defaultProp, D3D12_HEAP_FLAG_NONE, &iDesc,
-		D3D12_RESOURCE_STATE_COPY_DEST, nullptr, IID_PPV_ARGS(&m_iBuffer));
+	memcpy(m_iBuffer->GetBufferPointer(), m_geo.indices.data(), ibByteSize);
 
-	auto uploadProp = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD);
-	_rd->CreateCommittedResource(&uploadProp, D3D12_HEAP_FLAG_NONE, &iDesc,
-		D3D12_RESOURCE_STATE_GENERIC_READ, nullptr, IID_PPV_ARGS(&m_iUpload));
+	m_iGPUBuffer = CreateDefaultBuffer(_rd, _list, m_geo.indices.data(), ibByteSize, m_iUpload);
 
-	void* pData;
-	m_iUpload->Map(0, nullptr, &pData);
-	memcpy(pData, m_geo.indices.data(), iBufferSize);
-	m_iUpload->Unmap(0, nullptr);
+	IndexFormat = DXGI_FORMAT_R32_UINT;
+	IndexBufferByteSize = ibByteSize;
 
-	_list->CopyBufferRegion(m_iBuffer, 0, m_iUpload, 0, iBufferSize);
+	SubmeshGeometry submesh;
+	submesh.IndexCount = (UINT)m_geo.indices.size();
+	submesh.StartIndexLocation = 0;
+	submesh.BaseVertexLocation = 0;
 
-	auto barrier = CD3DX12_RESOURCE_BARRIER::Transition(m_iBuffer,
-		D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_INDEX_BUFFER);
-	_list->ResourceBarrier(1, &barrier);
-
-	m_ibView.BufferLocation = m_iBuffer->GetGPUVirtualAddress();
-	m_ibView.SizeInBytes = iBufferSize;
-	m_ibView.Format = DXGI_FORMAT_R32_UINT; // Essential for DrawIndexed
-
+	DrawArgs["box"] = submesh;
 }
 
 void Mesh::UploadVertex(ID3D12Device* _rd, ID3D12GraphicsCommandList* _list)
 {
-	const uint32 vBufferSize = static_cast<uint32>(m_geo.vertices.size() * sizeof(m_geo.vertices[0]));
+	const UINT vbByteSize = (UINT)m_geo.vertices.size() * sizeof(vertex);
+	D3DCreateBlob(vbByteSize, &m_vBuffer);
 
+	memcpy(m_vBuffer->GetBufferPointer(), m_geo.vertices.data(), vbByteSize);
 
+	m_vGPUBuffer = CreateDefaultBuffer(_rd, _list, m_geo.vertices.data(), vbByteSize, m_vUpload);
+
+	VertexByteStride = sizeof(vertex);
+	VertexBufferByteSize = vbByteSize;
+}
+
+ID3D12Resource* Mesh::CreateDefaultBuffer(ID3D12Device* _rd, ID3D12GraphicsCommandList* _list, const void* _data, UINT64 _byteSize, ID3D12Resource* _uploadBuffer)
+{
+	ID3D12Resource* defaultBuffer = nullptr;
 	auto defaultProp = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT);
-	auto vDesc = CD3DX12_RESOURCE_DESC::Buffer(vBufferSize);
-	_rd->CreateCommittedResource(&defaultProp, D3D12_HEAP_FLAG_NONE, &vDesc,
-		D3D12_RESOURCE_STATE_COPY_DEST, nullptr, IID_PPV_ARGS(&m_vBuffer));
+
+	auto bufferDesc = CD3DX12_RESOURCE_DESC::Buffer(_byteSize);
+
+	HRESULT hr = _rd->CreateCommittedResource(&defaultProp, D3D12_HEAP_FLAG_NONE, &bufferDesc,
+		D3D12_RESOURCE_STATE_COMMON, nullptr, IID_PPV_ARGS(&defaultBuffer));
+	if (FAILED(hr))
+	{
+		DebugMsg("failed to build default buffer", DebugFlag::WARNING);
+	}
+	ID3D12Resource* uploadBuffer = nullptr;
 
 	auto uploadProp = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD);
-	_rd->CreateCommittedResource(&uploadProp, D3D12_HEAP_FLAG_NONE, &vDesc,
-		D3D12_RESOURCE_STATE_GENERIC_READ, nullptr, IID_PPV_ARGS(&m_vUpload));
 
-	void* pData;
-	m_vUpload->Map(0, nullptr, &pData);
-	memcpy(pData, m_geo.vertices.data(), vBufferSize);
-	m_vUpload->Unmap(0, nullptr);
+	CD3DX12_RESOURCE_DESC resourceDesc = CD3DX12_RESOURCE_DESC::Buffer(_byteSize);
 
-	_list->CopyBufferRegion(m_vBuffer, 0, m_vUpload, 0, vBufferSize);
+	hr = _rd->CreateCommittedResource(&uploadProp, D3D12_HEAP_FLAG_NONE, &resourceDesc,
+		D3D12_RESOURCE_STATE_GENERIC_READ, nullptr, IID_PPV_ARGS(&uploadBuffer));
+	if (FAILED(hr))
+	{
+		DebugMsg("failed to build UploadBuffer", DebugFlag::WARNING);
+	}
 
-	auto barrier = CD3DX12_RESOURCE_BARRIER::Transition(m_vBuffer,
-		D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER);
+	D3D12_SUBRESOURCE_DATA subResourceData = {};
+	subResourceData.pData = _data;
+	subResourceData.RowPitch = _byteSize;
+	subResourceData.SlicePitch = subResourceData.RowPitch;
+
+	auto barrier = CD3DX12_RESOURCE_BARRIER::Transition(defaultBuffer,
+		D3D12_RESOURCE_STATE_COMMON, D3D12_RESOURCE_STATE_COPY_DEST);
+
 	_list->ResourceBarrier(1, &barrier);
 
-	m_vbView.BufferLocation = m_vBuffer->GetGPUVirtualAddress();
-	m_vbView.StrideInBytes = sizeof(vertex);
-	m_vbView.SizeInBytes = vBufferSize;
+	UpdateSubresources<1>(_list, defaultBuffer, uploadBuffer, 0, 0, 1, &subResourceData);
+
+	CD3DX12_RESOURCE_BARRIER svalue = CD3DX12_RESOURCE_BARRIER::Transition(defaultBuffer,
+		D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_GENERIC_READ);
+
+	_list->ResourceBarrier(1, &svalue);
+
+	return defaultBuffer;
 }

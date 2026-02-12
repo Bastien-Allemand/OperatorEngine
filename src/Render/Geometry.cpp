@@ -1,25 +1,45 @@
 #include "pch.h"
 #include "Geometry.h"
+#include <DirectXColors.h>
 
-void Geometry::BuildQuad()
+void Geometry::BuildBox()
 {
-    // 4 Sommets pour les 4 coins
-    vertices = {
-        // Position              // Normale (Couleur)    // UV
-        {{-0.5f,  0.5f, 0.0f},  {1.0f, 0.0f, 0.0f},     {0.0f, 0.0f}}, // 0 : Haut-Gauche (Rouge)
-        {{ 0.5f,  0.5f, 0.0f},  {0.0f, 1.0f, 0.0f},     {1.0f, 0.0f}}, // 1 : Haut-Droite (Vert)
-        {{ 0.5f, -0.5f, 0.0f},  {0.0f, 0.0f, 1.0f},     {1.0f, 1.0f}}, // 2 : Bas-Droite  (Bleu)
-        {{-0.5f, -0.5f, 0.0f},  {1.0f, 1.0f, 0.0f},     {0.0f, 1.0f}}  // 3 : Bas-Gauche  (Jaune)
-    };
+	vertices =
+	{
+		vertex({ Vector3f(-1.f, -1.f, -1.f), Vector4f(DirectX::Colors::White) }),
+		vertex({ Vector3f(-1.f, +1.f, -1.f), Vector4f(DirectX::Colors::Black) }),
+		vertex({ Vector3f(+1.f, +1.f, -1.f), Vector4f(DirectX::Colors::Red) }),
+		vertex({ Vector3f(+1.f, -1.f, -1.f), Vector4f(DirectX::Colors::Green) }),
+		vertex({ Vector3f(-1.f, -1.f, +1.f), Vector4f(DirectX::Colors::Blue) }),
+		vertex({ Vector3f(-1.f, +1.f, +1.f), Vector4f(DirectX::Colors::Yellow) }),
+		vertex({ Vector3f(+1.f, +1.f, +1.f), Vector4f(DirectX::Colors::Cyan) }),
+		vertex({ Vector3f(+1.f, -1.f, +1.f), Vector4f(DirectX::Colors::Magenta) })
+	};
 
-    // Ordre Clockwise pour DirectX
-    indices = {
-        0, 1, 2, // Premier triangle (H-G, H-D, B-D)
-        0, 2, 3  // Deuxième triangle (H-G, B-D, B-G)
-    };
-}
+	indices =
+	{
+		// front face
+		0, 1, 2,
+		0, 2, 3,
 
-void Geometry::BuildVertexBuffer()
-{
+		// back face
+		4, 6, 5,
+		4, 7, 6,
 
+		// left face
+		4, 5, 1,
+		4, 1, 0,
+
+		// right face
+		3, 2, 6,
+		3, 6, 7,
+
+		// top face
+		1, 5, 6,
+		1, 6, 2,
+
+		// bottom face
+		4, 0, 3,
+		4, 3, 7
+	};
 }

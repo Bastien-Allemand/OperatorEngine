@@ -4,6 +4,7 @@
 #include <iostream>
 #include <vector>
 #include <cstdlib>
+#include <array>
 
 using int8 = __int8;
 using int16 = __int16;
@@ -31,6 +32,7 @@ using WString = std::wstring;
 
 template<typename T>
 using Vector = std::vector<T>;
+
 
 enum class DebugFlag {
     LOG,  

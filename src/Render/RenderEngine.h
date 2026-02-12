@@ -54,6 +54,12 @@ private:
 	Mesh* m_quadMesh = nullptr;
 
 	Matrix4x4f m_world;
+	Matrix4x4f m_view;
+	Matrix4x4f m_proj;
+
+	float mTheta = 1.5f * DirectX::XM_PI;
+	float mPhi = DirectX::XM_PIDIV4;
+	float mRadius = 5.0f;
 
 	bool FlushCommandQueue();
 };

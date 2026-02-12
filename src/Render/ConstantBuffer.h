@@ -9,15 +9,15 @@ public:
     }
 
     bool Init(ID3D12Device* device, ID3D12DescriptorHeap* heap, UINT descriptorIndex);
-    void Update(const T& data) {
-        memcpy(m_mappedData, &data, sizeof(T));
+    void CopyData(int elementindex,const T& data) {
+        memcpy(&m_mappedData[elementindex*sizeof(T)], &data, sizeof(T));
     }
 
     D3D12_GPU_DESCRIPTOR_HANDLE GpuHandle() const { return m_gpuHandle; }
     D3D12_GPU_VIRTUAL_ADDRESS GetAddress() const { return m_resource->GetGPUVirtualAddress(); }
 private:
     ID3D12Resource* m_resource = nullptr;
-    T* m_mappedData = nullptr;
+    BYTE* m_mappedData = nullptr;
     UINT m_bufferSize = 0;
     D3D12_GPU_DESCRIPTOR_HANDLE m_gpuHandle = {};
 };

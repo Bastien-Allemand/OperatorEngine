@@ -9,12 +9,11 @@ bool PipelineStateObject::Init(ID3D12Device* _device)
 	D3D12_GRAPHICS_PIPELINE_STATE_DESC psoDesc = {};
 	// Input Layout,Vertex Shader, Pixel Shader
 	InitInputLayout(&psoDesc);
-	InitVs(&psoDesc, L"../../res/Render/Shader/DefaultShader.shader");
-	InitPs(&psoDesc, L"../../res/Render/Shader/DefaultShader.shader");
+	InitVs(&psoDesc, L"../../res/Render/Shader/DefaultShader.txt");
+	InitPs(&psoDesc, L"../../res/Render/Shader/DefaultShader.txt");
 	InitRootSig(_device);
 	psoDesc.pRootSignature = m_rootSig;
 	psoDesc.RasterizerState = CD3DX12_RASTERIZER_DESC(D3D12_DEFAULT);
-	psoDesc.RasterizerState.CullMode = D3D12_CULL_MODE_NONE;
 	psoDesc.BlendState = CD3DX12_BLEND_DESC(D3D12_DEFAULT);
 	psoDesc.DepthStencilState = CD3DX12_DEPTH_STENCIL_DESC(D3D12_DEFAULT);
 	psoDesc.SampleMask = UINT_MAX; // Standard
@@ -91,10 +90,10 @@ bool PipelineStateObject::InitPs(D3D12_GRAPHICS_PIPELINE_STATE_DESC* _desc, cons
 
 bool PipelineStateObject::InitInputLayout(D3D12_GRAPHICS_PIPELINE_STATE_DESC* _desc)
 {
-	m_inputLayout = {
-		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0,  D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
-		{ "NORMAL",   0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 12, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 }, // Offset 12 (3 * 4 octets)
-		{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT,    0, 24, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 }  // Offset 24 (12 + 12)
+	m_inputLayout = 
+	{
+		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
+		{ "COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 12, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 }
 	};
 
 	_desc->InputLayout = { m_inputLayout.data(), (UINT)m_inputLayout.size() };
