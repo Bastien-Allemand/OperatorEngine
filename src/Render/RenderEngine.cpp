@@ -14,6 +14,8 @@
 #include "CommandContext.h"
 #include "PipelineStateObject.h"
 #include "ConstantBuffer.h"
+#include "PipelineStateObject2D.h"
+#include "Font.h"
 
 
 RenderEngine::~RenderEngine()
@@ -30,6 +32,7 @@ RenderEngine::~RenderEngine()
 	delete m_renderDevice;
 	delete m_commandContext;
 	delete m_pipelineStateObject;
+	delete m_pso2D;
 	delete m_swapChain;
 	delete m_fence;
 	delete m_desc;
@@ -50,11 +53,13 @@ bool RenderEngine::Init(int _width, int _height, HWND _handle)
 	r = m_desc->InitDSV(m_renderDevice->GDevice()); Log(r, "Initializing DSV")
 	r = m_desc->InitCBV(m_renderDevice->GDevice()); Log(r, "Initializing CBV")
 	r = m_pipelineStateObject->Init(m_renderDevice->GDevice()); Log(r, "Initializing PSO")
+	r = m_pso2D->Init(m_renderDevice->GDevice()); Log(r, "Initializing PSO 2D")
 	r = m_fence->Init(m_renderDevice->GDevice()); Log(r, "Initializing Fence")
 	r = Resize(_width, _height); Log(r,"Resizing")
 	r = m_sceneCB->Init(m_renderDevice->GDevice(), m_desc->GcbvHeap(), 0); Log(r, "Initializing Scene Constant Buffer")
 	r = m_lightCB->Init(m_renderDevice->GDevice(), m_desc->GcbvHeap(), 1); Log(r, "Initializing Light Constant Buffer")
 	m_lightCB->CopyData(0, m_lightData);
+	r = InitFont(); Log(r, "Initializing Font")
 	return 0;
 }
 
@@ -108,9 +113,7 @@ void RenderEngine::Draw()
 	list->SetDescriptorHeaps(_countof(descriptorHeaps), descriptorHeaps);
 
 	list->SetGraphicsRootSignature(m_pipelineStateObject->GRootSig());
-
 	list->SetPipelineState(m_pipelineStateObject->GPipelineState());
-
 	list->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
 	list->SetGraphicsRootConstantBufferView(0, m_sceneCB->GetAddress());
@@ -121,8 +124,9 @@ void RenderEngine::Draw()
 		m_meshes[i]->Upload(m_renderDevice->GDevice(), list);
 		m_meshes[i]->Bind(list);
 		list->DrawIndexedInstanced(m_meshes[i]->GetIndexCount(), 1, 0, 0, 0);
-		i++;
 	}
+	m_font->Upload(m_renderDevice->GDevice(), list);
+	m_font->DrawString(list, m_pso2D, m_swapChain, m_fontSrvHeap, "Hello DirectX 12!", 50.0f, 50.0f, 24.0f);
 
 	barrier = CD3DX12_RESOURCE_BARRIER::Transition(m_renderTarget->GCurrentBackBuffer(),
 		D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT);
@@ -272,6 +276,7 @@ void RenderEngine::HardInit()
 	m_renderDevice = new RenderDevice();
 	m_commandContext = new CommandContext();
 	m_pipelineStateObject = new PipelineStateObject();
+	m_pso2D = new PipelineStateObject2D();
 	m_swapChain = new SwapChain();
 	m_fence = new Fence();
 	m_desc = new Descriptors();
@@ -306,4 +311,51 @@ bool RenderEngine::InitQueue()
 		return 1;
 	}
 	return 0;
+}
+
+bool RenderEngine::InitFont()
+{
+	D3D12_DESCRIPTOR_HEAP_DESC srvHeapDesc = {};
+	srvHeapDesc.NumDescriptors = 1;
+	srvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
+	srvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
+	HRESULT hr = m_renderDevice->GDevice()->CreateDescriptorHeap(&srvHeapDesc, IID_PPV_ARGS(&m_fontSrvHeap));
+	if (FAILED(hr))
+	{
+		Log(true, "Failed to create font SRV heap");
+		return 1;
+	}
+	m_commandContext->GCommandAllocator()->Reset();
+	m_commandContext->GCommandList()->Reset(m_commandContext->GCommandAllocator(), nullptr);
+
+	m_font = new Font();
+	if (!m_font->Init(m_renderDevice->GDevice(), m_commandContext->GCommandList(), m_desc->GcbvHeap(), 2,
+		L"../../res/Render/arial.dds", 8, 16))
+	{
+		Log(true, "Failed to init font");
+		return 1;
+	}
+	m_commandContext->CloseAndExecute(m_queue);
+	FlushCommandQueue();
+
+	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
+	srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+	srvDesc.Format = m_font->GetTexture()->GetDesc().Format;
+	srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
+	srvDesc.Texture2D.MipLevels = m_font->GetTexture()->GetDesc().MipLevels;
+
+	m_renderDevice->GDevice()->CreateShaderResourceView(
+		m_font->GetTexture(),
+		&srvDesc,
+		m_fontSrvHeap->GetCPUDescriptorHandleForHeapStart());
+
+	return 0;
+}
+
+void RenderEngine::DrawString()
+{
+	auto list = m_commandContext->GCommandList();
+	m_font->Upload(m_renderDevice->GDevice(), list);
+	m_font->DrawString(list, m_pso2D, m_swapChain, m_fontSrvHeap,
+		"Hello World!", 100.0f, 100.0f, 32.0f);
 }

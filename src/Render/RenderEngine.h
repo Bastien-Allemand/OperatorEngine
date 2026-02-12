@@ -1,6 +1,7 @@
 #pragma once
 
 class Mesh;
+class Font;
 class Fence;
 class Factory;
 class SwapChain;
@@ -9,6 +10,7 @@ class RenderDevice;
 class RenderTarget;
 class CommandContext;
 class PipelineStateObject;
+class PipelineStateObject2D;
 template<typename T>
 class ConstantBuffer;
 
@@ -17,10 +19,10 @@ struct SceneConstantBuffer {
 	Matrix4x4f gViewProj;
 };
 struct alignas(16) DirectionalLight {
-	Vector4f Ambient;   // 16 octets
-	Vector4f Diffuse;   // 16 octets
-	Vector4f Specular;  // 16 octets
-	Vector3f Direction; // 12 octets
+	Vector4f Ambient;
+	Vector4f Diffuse;
+	Vector4f Specular;
+	Vector3f Direction;
 	float Pad;
 };
 struct LightData
@@ -44,24 +46,21 @@ public:
 
 private:
 	Factory* m_factory = nullptr;
-
 	RenderDevice* m_renderDevice = nullptr;
-
 	CommandContext* m_commandContext = nullptr;
-
 	PipelineStateObject* m_pipelineStateObject = nullptr;
-
+	PipelineStateObject2D* m_pso2D = nullptr;
 	SwapChain* m_swapChain = nullptr;
-
 	ID3D12CommandQueue* m_queue = nullptr;
-
 	Descriptors* m_desc;
-
 	RenderTarget* m_renderTarget;
-
 	Fence* m_fence = nullptr;
 
 	Vector<Mesh*> m_meshes;
+	Font* m_font = nullptr;  // Système de font
+
+	// Heap SRV pour la texture de font
+	ID3D12DescriptorHeap* m_fontSrvHeap = nullptr;
 
 	ConstantBuffer<SceneConstantBuffer>* m_sceneCB = nullptr;
 	ConstantBuffer<LightData>* m_lightCB = nullptr;
@@ -77,8 +76,9 @@ private:
 	float mRadius = 5.0f;
 
 	bool FlushCommandQueue();
-
 	void HardInit();
 	bool InitQueue();
+	bool InitFont();
+	void DrawString();
 };
 

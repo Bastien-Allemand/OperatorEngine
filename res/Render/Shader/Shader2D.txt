@@ -1,0 +1,45 @@
+// =============================================
+// Shader 2D pour le rendu de texte (Font)
+// =============================================
+
+// Constant buffer pour la transformation et les UVs du caractère
+cbuffer cbFont : register(b0)
+{
+    float4x4 gWorldViewProj;  // Matrice combinée (World * Ortho)
+    float4 uvOffset;          // x=u, y=v, z=width, w=height (portion de l'atlas)
+};
+
+// Texture de l'atlas de font
+Texture2D gFontTexture : register(t0);
+SamplerState gSampler : register(s0);
+
+struct VertexIn
+{
+    float3 PosL : POSITION;
+    float2 TexC : TEXCOORD;
+};
+
+struct VertexOut
+{
+    float4 PosH : SV_POSITION;
+    float2 TexC : TEXCOORD;
+};
+
+VertexOut VS(VertexIn vin)
+{
+    VertexOut vout;
+    vout.PosH = mul(float4(vin.PosL, 1.0f), gWorldViewProj);
+    vout.TexC.x = uvOffset.x + vin.TexC.x * uvOffset.z;  // u + texU * width
+    vout.TexC.y = uvOffset.y + vin.TexC.y * uvOffset.w;  // v + texV * height
+    
+    return vout;
+}
+
+float4 PS(VertexOut pin) : SV_Target
+{
+    float4 texColor = gFontTexture.Sample(gSampler, pin.TexC);
+    if (texColor.a < 0.1f)
+        discard;
+    
+    return texColor;
+}
