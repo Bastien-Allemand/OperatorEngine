@@ -1,5 +1,7 @@
 #pragma once
-
+#include <string>
+#include <unordered_map>
+#include <iostream>
 
 struct Componant
 {
@@ -52,13 +54,6 @@ public:
 	Matrix4x4f world;
 };
 
-
-#pragma once
-#include "Componant.h"
-#include <string>
-#include <unordered_map>
-#include <iostream>
-
 struct InputAction
 {
     int keyCode;
@@ -70,7 +65,7 @@ struct InputAction
 struct InputComponent : public Componant
 {
     std::unordered_map<std::string, InputAction> actions;
-	void BindAction(const std::string& actionName, int key);
-	bool IsActionPressed(const std::string& actionName);
-	bool IsActionJustPressed(const std::string& actionName);
+	void BindAction(const std::string& _actionName, int key);
+	bool IsActionPressed(const std::string& _actionName);
+	bool IsActionJustPressed(const std::string& _actionName);
 };
