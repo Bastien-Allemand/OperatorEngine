@@ -22,7 +22,8 @@ public:
 	RenderEngine() = default;
 	~RenderEngine();
 	bool Init(int _width, int _height, HWND _handle);
-	void Update();
+	void Update(float dt);
+	void Draw();
 	bool Resize(int _width, int _height);
 	void AddMeshToDraw(Mesh* _mesh) { m_meshes.push_back(_mesh); }
 	bool m4xMsaaState = 0;

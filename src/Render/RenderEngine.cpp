@@ -136,7 +136,7 @@ bool RenderEngine::Init(int _width, int _height, HWND _handle)
 	m_quadMesh = new Mesh(geo);
 	m_quadMesh->Upload(m_renderDevice->GDevice(), m_commandContext->GCommandList());
 
-
+	m_meshes.push_back(m_quadMesh);
 
 	m_commandContext->CloseAndExecute(m_queue);
 
@@ -146,7 +146,7 @@ bool RenderEngine::Init(int _width, int _height, HWND _handle)
 
 }
 
-void RenderEngine::Update()
+void RenderEngine::Update(float dt)
 {
 	float x = mRadius * sinf(mPhi) * cosf(mTheta);
 	float z = mRadius * sinf(mPhi) * sinf(mTheta);
@@ -159,9 +159,9 @@ void RenderEngine::Update()
 	DirectX::XMStoreFloat4x4(&m_view, view);
 	DirectX::XMMATRIX world = XMLoadFloat4x4(&m_world);
 
-	world = world * DirectX::XMMatrixRotationZ(0.001f);
-	world = world * DirectX::XMMatrixRotationY(0.001f);
-	world = world * DirectX::XMMatrixRotationX(0.001f);
+	world = world * DirectX::XMMatrixRotationZ(dt);
+	world = world * DirectX::XMMatrixRotationY(dt);
+	world = world * DirectX::XMMatrixRotationX(dt);
 	DirectX::XMStoreFloat4x4(&m_world, world);
 	DirectX::XMMATRIX proj = XMLoadFloat4x4(&m_proj);
 	SceneConstantBuffer cb;
@@ -194,41 +194,25 @@ void RenderEngine::Update()
 
 	list->SetPipelineState(m_pipelineStateObject->GPipelineState());
 
+	list->SetGraphicsRootConstantBufferView(0, m_sceneCB->GetAddress());
 
-	//m_commandContext->GCommandList()->SetGraphicsRootDescriptorTable(0, m_sceneCB->GpuHandle());
+	list->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
-	if (m_quadMesh)
+	int i = 0;
+	for (auto* mesh : m_meshes)
 	{
-		m_quadMesh->Bind(list);
-		list->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-		list->SetGraphicsRootConstantBufferView(0, m_sceneCB->GetAddress());
-		list->DrawIndexedInstanced(m_quadMesh->DrawArgs["box"].IndexCount, 1, 0, 0, 0);
+		mesh->Upload(m_renderDevice->GDevice(), m_commandContext->GCommandList()); 
+		mesh->Bind(m_commandContext->GCommandList());
+		i++;
+		m_commandContext->GCommandList()->DrawIndexedInstanced(mesh->GetIndexCount(), m_meshes.size(), 0, 0, 0);
 	}
-
-	//int i = 0;
-	//for (auto* mesh : m_meshes)
-	//{
-	//	mesh->Upload(m_renderDevice->GDevice(), m_commandContext->GCommandList()); // Propre !
-	//	mesh->Bind(m_commandContext->GCommandList()); // Propre !
-
-	//	// On dessine : 6 indices pour les 2 triangles du quad
-	//	m_commandContext->GCommandList()->DrawIndexedInstanced(mesh->GetIndexCount(), 1, 0, 0, 0);
-	//	
-	//	m_meshes.erase(m_meshes.begin() + i);
-	//	mesh = nullptr;
-	//	i++;
-	//}
-
-	//D3D12_GPU_VIRTUAL_ADDRESS cbvAddress;
-	//cbvAddress
-	
 
 	barrier = CD3DX12_RESOURCE_BARRIER::Transition(m_renderTarget->GCurrentBackBuffer(), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT);
 	list->ResourceBarrier(1, &barrier);
 
 	m_commandContext->CloseAndExecute(m_queue);
 
-	HRESULT hr = m_swapChain->GSwapChain()->Present(1, 0);
+	HRESULT hr = m_swapChain->GSwapChain()->Present(0, 0);
 	if (FAILED(hr)) {
 		if (hr == DXGI_ERROR_DEVICE_REMOVED) {
 			HRESULT reason = m_renderDevice->GDevice()->GetDeviceRemovedReason();
@@ -238,8 +222,13 @@ void RenderEngine::Update()
 	m_renderTarget->SwapBuffers();
 
 
-	FlushCommandQueue();
+	//FlushCommandQueue();
 
+
+}
+
+void RenderEngine::Draw()
+{
 
 }
 
