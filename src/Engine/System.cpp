@@ -87,16 +87,16 @@ void TransformSystem::Move()
     }
 }
 
-void InputSystem::Update(const std::vector<UINT>& entities, float deltaTime)
+void InputSystem::Update(float deltaTime)
 {
     InputManager* im = InputManager::GetInstance();
     im->Update();
 
-    for (UINT id : entities)
+    for (Entity* entity : m_entitiesss)
     {
         try
         {
-            InputComponent& inputComp = m_gameManager->GetComponant<InputComponent>(id);
+            InputComponent& inputComp = m_gameManager->GetComponant<InputComponent>(entity);
             if (inputComp.id != id) continue;
             for (auto& [name, action] : inputComp.actions)
             {
@@ -111,3 +111,4 @@ void InputSystem::Update(const std::vector<UINT>& entities, float deltaTime)
         catch (const std::exception&) { continue; }
     }
 }
+

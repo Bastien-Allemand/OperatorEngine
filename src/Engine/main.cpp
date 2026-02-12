@@ -6,40 +6,35 @@
 int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR cmdLine, int cmdShow)
 {
     GameManager* gameManager = GameManager::GetInstance();
-    Entity entity1;
-    entity1.id = std::make_pair(0, 1);
-    gameManager->AddEntity(entity1.id.first, true, true);
-    Transform& t1 = gameManager->AddComponant<Transform>(entity1.id.first);
+    Entity* entity1 = gameManager->AddEntity(1);
+    TransformComponant& t1 = gameManager->AddComponant<TransformComponant>(entity1);
     t1.position = Vector3f(0.0f, 0.0f, 0.0f);
-    InputComponent& inp1 = gameManager->AddComponant<InputComponent>(entity1.id.first);
-    TransformSystem& transSys = gameManager->AddSystem<TransformSystem>(entity1.id.first);
-    InputSystem& inputSys = gameManager->AddSystem<InputSystem>(entity1.id.first);
-    float dt = 0.016f;
-    inputSys.Update({ entity1.id.first }, dt);
-    transSys.Update({ entity1.id.first }, dt);
-    Transform& res = gameManager->GetComponant<Transform>(entity1.id.first);
+    InputComponent& inp1 = gameManager->AddComponant<InputComponent>(entity1);
+    TransformSystem& transSys = gameManager->AddSystem<TransformSystem>(entity1);
+    InputSystem& inputSys = gameManager->AddSystem<InputSystem>(entity1);
+    Transform& res = gameManager->GetComponant<Transform>(entity1);
     std::cout << "Pos Z apres Input: " << res.position.z << std::endl;
 
 
     // partie Loïc
-	Entity* entity1 = gameManager->AddEntity(0);
-    Entity* entity2 = gameManager->AddEntity(1);
-    Entity* entity3 = gameManager->AddEntity(2);
+	Entity* entity4 = gameManager->AddEntity(2);
+    Entity* entity5 = gameManager->AddEntity(3);
+    Entity* entity6 = gameManager->AddEntity(4);
 
-    TransformComponant&  a = gameManager->AddComponant<TransformComponant>(entity1);
-    TransformComponant& b = gameManager->AddComponant<TransformComponant>(entity2);
-    TransformComponant& c = gameManager->AddComponant<TransformComponant>(entity3);
+    TransformComponant&  a = gameManager->AddComponant<TransformComponant>(entity4);
+    TransformComponant& b = gameManager->AddComponant<TransformComponant>(entity5);
+    TransformComponant& c = gameManager->AddComponant<TransformComponant>(entity6);
 
-    entity1->AddChild(entity2);
+    entity6->AddChild(entity4);
 
-    TransformSystem& transformSystem = gameManager->AddSystem<TransformSystem>(entity1);
-    TransformSystem& transformSystem2 = gameManager->AddSystem<TransformSystem>(entity2);
-    TransformSystem& transformSystem3 = gameManager->AddSystem<TransformSystem>(entity3);
+    TransformSystem& transformSystem = gameManager->AddSystem<TransformSystem>(entity4);
+    TransformSystem& transformSystem2 = gameManager->AddSystem<TransformSystem>(entity5);
+    TransformSystem& transformSystem3 = gameManager->AddSystem<TransformSystem>(entity6);
 
     gameManager->Update();
-    TransformComponant& retrievedTransform1 = gameManager->GetComponant<TransformComponant>(entity1);
-    TransformComponant& retrievedTransform2 = gameManager->GetComponant<TransformComponant>(entity2);
-    TransformComponant& retrievedTransform3 = gameManager->GetComponant<TransformComponant>(entity3);
+    TransformComponant& retrievedTransform1 = gameManager->GetComponant<TransformComponant>(entity4);
+    TransformComponant& retrievedTransform2 = gameManager->GetComponant<TransformComponant>(entity5);
+    TransformComponant& retrievedTransform3 = gameManager->GetComponant<TransformComponant>(entity6);
 
 
         // Test pour voir si �a marche
