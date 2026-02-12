@@ -1,6 +1,7 @@
 #pragma once
 class Window;
 class RenderEngine;
+class Mesh;
 #include <chrono>
 class App
 {
@@ -16,9 +17,9 @@ public:
 private:
 	static LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
 	Window* m_window = nullptr;
-
+	Mesh* m_mesh = nullptr;
 	RenderEngine* m_renderEngine = nullptr;
 
-
+	bool test = false;
 };
 

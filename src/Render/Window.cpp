@@ -22,8 +22,10 @@ bool Window::Init(int _width, int _height, const wchar_t* _title, WNDPROC _WndPr
     if (!m_hwnd)
         return 1;
 
-    ShowWindow(m_hwnd, SW_SHOW);
-    UpdateWindow(m_hwnd);
+    bool r = !ShowWindow(m_hwnd, SW_SHOW);
+	Log(r, "Showing Window");
+    r = !UpdateWindow(m_hwnd);
+	Log(r, "Updating Window");
     return 0;
 }
 int Window::GCWidth()

@@ -6,6 +6,11 @@
 #include <cstdlib>
 #include <array>
 
+#define RESET   "\033[0m"
+#define RED     "\033[31m"
+#define GREEN   "\033[32m"
+#define BOLD    "\033[1m"
+
 using int8 = __int8;
 using int16 = __int16;
 using int32 = __int32;
@@ -50,3 +55,11 @@ enum class DebugFlag {
         } \
     } while(0)
 
+#define Log(condition, message)                                                                          \
+    do {                                                                                                 \
+        if (condition) {                                                                                 \
+            std::cerr << RED << BOLD << "[ERROR] " << RESET << RED << message << RESET << std::endl;    \
+        } else {                                                                                         \
+            std::cout << GREEN << BOLD << "[Valid] " << RESET << GREEN << message << RESET << std::endl; \
+        }                                                                                                \
+    } while (0);

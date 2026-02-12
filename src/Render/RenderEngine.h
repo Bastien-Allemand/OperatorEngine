@@ -25,7 +25,7 @@ public:
 	void Update(float dt);
 	void Draw();
 	bool Resize(int _width, int _height);
-	void AddMeshToDraw(Mesh* _mesh) { m_meshes.push_back(_mesh); }
+	void AddMeshToDraw(Mesh* _mesh);
 	bool m4xMsaaState = 0;
 	uint32 m4xMsaaQuality = 0;
 
@@ -63,5 +63,8 @@ private:
 	float mRadius = 5.0f;
 
 	bool FlushCommandQueue();
+
+	void HardInit();
+	bool InitQueue();
 };
 

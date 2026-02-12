@@ -3,21 +3,22 @@
 #include "Geometry.h"
 #include "CommandContext.h"
 
-Mesh::Mesh(Geometry& _geo) : m_geo(_geo){}
+Mesh::Mesh(Geometry _geo) : m_geo(_geo){}
 
 size_t Mesh::GetIndexCount() const
 {
 	return m_geo.indices.size();
 }
 
-void Mesh::Upload(ID3D12Device* _rd, ID3D12GraphicsCommandList* _list)
+bool Mesh::Upload(ID3D12Device* _rd, ID3D12GraphicsCommandList* _list)
 {
-	if (m_isUploaded) return;
+	if (m_isUploaded) return 1;
 
 	UploadVertex(_rd, _list);
 	UploadIndex(_rd, _list);
 	m_isUploaded = true;
 
+	return 0;
 }
 
 void Mesh::Bind(ID3D12GraphicsCommandList* _list)

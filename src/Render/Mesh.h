@@ -1,5 +1,5 @@
 #pragma once
-class Geometry;
+#include "Geometry.h"
 class CommandContext;
 class RenderDevice;
 #include <unordered_map>
@@ -18,9 +18,9 @@ struct SubmeshGeometry
 
 class Mesh {
 public:
-    Mesh(Geometry& _geo);
+    Mesh(Geometry _geo);
     size_t GetIndexCount() const;
-    void Upload(ID3D12Device* _rd, ID3D12GraphicsCommandList* _list);
+    bool Upload(ID3D12Device* _rd, ID3D12GraphicsCommandList* _list);
     void Bind(ID3D12GraphicsCommandList* _list);
 
     std::unordered_map<std::string, SubmeshGeometry> DrawArgs;
@@ -38,7 +38,7 @@ private:
     DXGI_FORMAT IndexFormat = DXGI_FORMAT_R16_UINT;
     UINT IndexBufferByteSize = 0;
 
-    Geometry& m_geo;
+    Geometry m_geo;
 	void UploadIndex(ID3D12Device* _rd, ID3D12GraphicsCommandList* _list);
 	void UploadVertex(ID3D12Device* _rd, ID3D12GraphicsCommandList* _list);
 	ID3D12Resource* CreateDefaultBuffer(ID3D12Device* _rd, ID3D12GraphicsCommandList* _list, const void* _data, UINT64 _byteSize, ID3D12Resource* _uploadBuffer);

@@ -38,95 +38,25 @@ RenderEngine::~RenderEngine()
 
 bool RenderEngine::Init(int _width, int _height, HWND _handle)
 {
-	m_factory = new Factory();
-	m_renderDevice = new RenderDevice();
-	m_commandContext = new CommandContext();
-	m_pipelineStateObject = new PipelineStateObject();
-	m_swapChain = new SwapChain();
-	m_fence = new Fence();
-	m_desc = new Descriptors();
-	m_renderTarget = new RenderTarget();
-	m_sceneCB = new ConstantBuffer<SceneConstantBuffer>();
-
-	DirectX::XMMATRIX world = DirectX::XMMatrixIdentity();
-	DirectX::XMStoreFloat4x4(&m_world, world);
-	DirectX::XMStoreFloat4x4(&m_view, world);
-	DirectX::XMStoreFloat4x4(&m_proj, world);
+	HardInit();
+	bool r;
 	//init factory
-	if (m_factory->InitFactory())
-	{
-		std::cout << "Failed to initialize factory" << std::endl;
-		return 1;
-	}
-
-	//init render device
-	if (m_renderDevice->Init(m_factory))
-	{
-		std::cout << "Failed to initialize render device" << std::endl;
-		return 1;
-	}
-
-	//init command context
-	if (m_commandContext->Init(m_renderDevice))
-	{
-		std::cout << "Failed to initialize command context" << std::endl;
-		return 1;
-	}
-
-	//init queue
-	D3D12_COMMAND_QUEUE_DESC queueDesc = {};
-	queueDesc.Flags = D3D12_COMMAND_QUEUE_FLAG_NONE;
-	queueDesc.Type = D3D12_COMMAND_LIST_TYPE_DIRECT;
-	HRESULT hr = m_renderDevice->GDevice()->CreateCommandQueue(&queueDesc, IID_PPV_ARGS(&m_queue));
-	if (FAILED(hr))
-	{
-		std::cout << "Command Queue creation failed" << std::endl;
-		return 1;
-	}
-
-	//init swapchain
-	if (m_swapChain->Init(_width, _height, _handle,m_factory->GFactory(),m_queue))
-	{
-		std::cout << "Failed to initialize swapchain" << std::endl;
-		return 1;
-	}
-
-	//init descriptor heap for render target views
-	if (m_desc->InitRTV(m_renderDevice->GDevice()))
-	{
-		std::cout << "Failed to Init RTV" << std::endl;
-		return 1;
-	}
-	if (m_desc->InitDSV(m_renderDevice->GDevice()))
-	{
-		std::cout << "Failed to Init DSV" << std::endl;
-		return 1;
-	}
-	if (m_desc->InitCBV(m_renderDevice->GDevice()))
-	{
-		DebugMsg("Failed to Init CBV", DebugFlag::WARNING);
-	}
-	hr = m_pipelineStateObject->Init(m_renderDevice->GDevice());
-	if (FAILED(hr))
-	{
-		std::cout << "Failed to Init PSO" << std::endl;
-		return 1;
-	}
-
-	if (m_fence->Init(m_renderDevice->GDevice()))
-	{
-		std::cout << "Failed to initialize fence" << std::endl;
-		return 1;
-	}
-
-
-
+	r = m_factory->InitFactory(); Log(r, "Initializing Factory")
+	r = m_renderDevice->Init(m_factory); Log(r, "Initializing Render Device")
+	r = m_commandContext->Init(m_renderDevice);	Log(r, "Initializing CommandContext")
+	r = InitQueue(); Log(r, "Initializing Command Queue")
+	r = m_swapChain->Init(_width, _height, _handle, m_factory->GFactory(), m_queue); Log(r, "Initializing SwapChain")
+	r = m_desc->InitRTV(m_renderDevice->GDevice()); Log(r, "Initializing RTV")
+	r = m_desc->InitDSV(m_renderDevice->GDevice()); Log(r, "Initializing DSV")
+	r = m_desc->InitCBV(m_renderDevice->GDevice()); Log(r, "Initializing CBV")
+	r = m_pipelineStateObject->Init(m_renderDevice->GDevice()); Log(r, "Initializing PSO")
+	r = m_fence->Init(m_renderDevice->GDevice()); Log(r, "Initializing Fence")
 	Resize(_width, _height);
-
-	if (m_sceneCB->Init(m_renderDevice->GDevice(), m_desc->GcbvHeap(), 0))
-	{
-		DebugMsg("Failed to initialize scene constant buffer", DebugFlag::WARNING);
-	}
+	r = m_sceneCB->Init(m_renderDevice->GDevice(), m_desc->GcbvHeap(), 0); Log(r, "Initializing Scene Constant Buffer")
+		if (m_sceneCB->Init(m_renderDevice->GDevice(), m_desc->GcbvHeap(), 0))
+		{
+			DebugMsg("Failed to initialize scene constant buffer", DebugFlag::WARNING);
+		}
 
 	m_commandContext->GCommandAllocator()->Reset();
 	m_commandContext->GCommandList()->Reset(m_commandContext->GCommandAllocator(), nullptr);
@@ -134,16 +64,13 @@ bool RenderEngine::Init(int _width, int _height, HWND _handle)
 	Geometry geo;
 	geo.BuildBox();
 	m_quadMesh = new Mesh(geo);
-	m_quadMesh->Upload(m_renderDevice->GDevice(), m_commandContext->GCommandList());
-
-	m_meshes.push_back(m_quadMesh);
+	//AddMeshToDraw(m_quadMesh);
 
 	m_commandContext->CloseAndExecute(m_queue);
 
 	FlushCommandQueue();
 
-
-
+	return 0;
 }
 
 void RenderEngine::Update(float dt)
@@ -168,49 +95,49 @@ void RenderEngine::Update(float dt)
 	DirectX::XMMATRIX worldViewProj = world * view * proj;
 	XMStoreFloat4x4(&cb.gWorldViewProj, XMMatrixTranspose(worldViewProj));
 
-	m_sceneCB->CopyData(0,cb);
+	m_sceneCB->CopyData(0, cb);
+}
 
+void RenderEngine::Draw()
+{
 	auto list = m_commandContext->GCommandList();
 	m_commandContext->GCommandAllocator()->Reset();
 	list->Reset(m_commandContext->GCommandAllocator(), nullptr);
 
-	list->RSSetViewports(1, &m_swapChain->GViewport());
-	list->RSSetScissorRects(1, &m_swapChain->GScissorRect());
+	list->RSSetViewports(1, m_swapChain->GViewport());
+	list->RSSetScissorRects(1, m_swapChain->GScissorRect());
 
 	auto barrier = CD3DX12_RESOURCE_BARRIER::Transition(m_renderTarget->GCurrentBackBuffer(), D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET);
 	list->ResourceBarrier(1, &barrier);
+	D3D12_CPU_DESCRIPTOR_HANDLE rtvHandle = m_renderTarget->GCurrentBackBufferView(m_desc->GrtvHeap(), m_desc->GCrtvSize());
 
-	list->ClearRenderTargetView(m_renderTarget->GCurrentBackBufferView(m_desc->GrtvHeap(), m_desc->GCrtvSize()), DirectX::Colors::Aquamarine, 0, nullptr);
+	list->ClearRenderTargetView(rtvHandle, DirectX::Colors::LightSteelBlue, 0, nullptr);
 	list->ClearDepthStencilView(m_desc->GdsvHandle(), D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.f, 0, 0, nullptr);
 
-	D3D12_CPU_DESCRIPTOR_HANDLE rtvHandle = m_renderTarget->GCurrentBackBufferView(m_desc->GrtvHeap(), m_desc->GCrtvSize());
 	auto dsvHandle = m_desc->GdsvHandle();
 	list->OMSetRenderTargets(1, &rtvHandle, FALSE, &dsvHandle);
 
-	ID3D12DescriptorHeap* descriptorHeaps[] = { m_desc->GcbvHeap()};
+	ID3D12DescriptorHeap* descriptorHeaps[] = { m_desc->GcbvHeap() };
 	list->SetDescriptorHeaps(_countof(descriptorHeaps), descriptorHeaps);
 
 	list->SetGraphicsRootSignature(m_pipelineStateObject->GRootSig());
 
 	list->SetPipelineState(m_pipelineStateObject->GPipelineState());
 
-	list->SetGraphicsRootConstantBufferView(0, m_sceneCB->GetAddress());
-
 	list->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
-	int i = 0;
+	list->SetGraphicsRootConstantBufferView(0, m_sceneCB->GetAddress());
 
-	m_quadMesh->Bind(m_commandContext->GCommandList());
-	list->DrawIndexedInstanced(m_quadMesh->GetIndexCount(), 1, 0, 0, 0);
+	for (int i = 0; i < m_meshes.size(); i++)
+	{
+		m_meshes[i]->Upload(m_renderDevice->GDevice(), list);
+		m_meshes[i]->Bind(list);
+		list->DrawIndexedInstanced(m_meshes[i]->GetIndexCount(), 1, 0, 0, 0);
+		i++;
+	}
 
-	//for (auto* mesh : m_meshes)
-	//{
-	//	mesh->Upload(m_renderDevice->GDevice(), m_commandContext->GCommandList()); 
-	//	mesh->Bind(m_commandContext->GCommandList());
-	//	i++;
-	//}
-
-	barrier = CD3DX12_RESOURCE_BARRIER::Transition(m_renderTarget->GCurrentBackBuffer(), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT);
+	barrier = CD3DX12_RESOURCE_BARRIER::Transition(m_renderTarget->GCurrentBackBuffer(),
+		D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT);
 	list->ResourceBarrier(1, &barrier);
 
 	m_commandContext->CloseAndExecute(m_queue);
@@ -224,13 +151,7 @@ void RenderEngine::Update(float dt)
 	}
 	m_renderTarget->SwapBuffers();
 
-
 	FlushCommandQueue();
-}
-
-void RenderEngine::Draw()
-{
-
 }
 
 bool RenderEngine::Resize(int _width, int _height)
@@ -315,16 +236,24 @@ bool RenderEngine::Resize(int _width, int _height)
 
 	FlushCommandQueue();
 
-	m_swapChain->GViewport().TopLeftX = 0;
-	m_swapChain->GViewport().TopLeftY = 0;
-	m_swapChain->GViewport().Width = static_cast<float>(_width);
-	m_swapChain->GViewport().Height = static_cast<float>(_height);
-	m_swapChain->GViewport().MinDepth = 0.0f;
-	m_swapChain->GViewport().MaxDepth = 1.0f;
+	m_swapChain->GViewport()->TopLeftX = 0;
+	m_swapChain->GViewport()->TopLeftY = 0;
+	m_swapChain->GViewport()->Width = static_cast<float>(_width);
+	m_swapChain->GViewport()->Height = static_cast<float>(_height);
+	m_swapChain->GViewport()->MinDepth = 0.0f;
+	m_swapChain->GViewport()->MaxDepth = 1.0f;
 
-	m_swapChain->GScissorRect() = {0, 0, _width, _height };
+	m_swapChain->GScissorRect()->left = 0;
+	m_swapChain->GScissorRect()->top = 0;
+	m_swapChain->GScissorRect()->right = _width;
+	m_swapChain->GScissorRect()->bottom = _height;
 
 
+}
+
+void RenderEngine::AddMeshToDraw(Mesh* _mesh)
+{
+	m_meshes.push_back(_mesh);
 }
 
 bool RenderEngine::FlushCommandQueue()
@@ -345,6 +274,38 @@ bool RenderEngine::FlushCommandQueue()
 
 		WaitForSingleObject(eventHandle, INFINITE);
 		CloseHandle(eventHandle);
+	}
+	return 0;
+}
+
+void RenderEngine::HardInit()
+{
+	m_factory = new Factory();
+	m_renderDevice = new RenderDevice();
+	m_commandContext = new CommandContext();
+	m_pipelineStateObject = new PipelineStateObject();
+	m_swapChain = new SwapChain();
+	m_fence = new Fence();
+	m_desc = new Descriptors();
+	m_renderTarget = new RenderTarget();
+	m_sceneCB = new ConstantBuffer<SceneConstantBuffer>();
+
+	DirectX::XMMATRIX world = DirectX::XMMatrixIdentity();
+	DirectX::XMStoreFloat4x4(&m_world, world);
+	DirectX::XMStoreFloat4x4(&m_view, world);
+	DirectX::XMStoreFloat4x4(&m_proj, world);
+}
+
+bool RenderEngine::InitQueue()
+{
+	D3D12_COMMAND_QUEUE_DESC queueDesc = {};
+	queueDesc.Flags = D3D12_COMMAND_QUEUE_FLAG_NONE;
+	queueDesc.Type = D3D12_COMMAND_LIST_TYPE_DIRECT;
+	HRESULT hr = m_renderDevice->GDevice()->CreateCommandQueue(&queueDesc, IID_PPV_ARGS(&m_queue));
+	if (FAILED(hr))
+	{
+		std::cout << "Command Queue creation failed" << std::endl;
+		return 1;
 	}
 	return 0;
 }

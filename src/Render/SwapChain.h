@@ -10,8 +10,8 @@ public:
 	DXGI_FORMAT GFormat() const { return m_format; }
 
 	IDXGISwapChain3* GSwapChain() const { return m_swapChain; }
-	D3D12_VIEWPORT& GViewport() { return m_viewport; }
-	D3D12_RECT& GScissorRect() { return m_scissorRect; }
+	D3D12_VIEWPORT* GViewport() { return &m_viewport; }
+	D3D12_RECT* GScissorRect() { return &m_scissorRect; }
 
 
 private:
