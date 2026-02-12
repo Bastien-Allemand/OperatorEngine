@@ -9,6 +9,7 @@
 #define RESET   "\033[0m"
 #define RED     "\033[31m"
 #define GREEN   "\033[32m"
+#define BLUE    "\033[34m"
 #define BOLD    "\033[1m"
 
 using int8 = __int8;
@@ -62,4 +63,9 @@ enum class DebugFlag {
         } else {                                                                                         \
             std::cout << GREEN << BOLD << "[Valid] " << RESET << GREEN << message << RESET << std::endl; \
         }                                                                                                \
+    } while (0);
+
+#define _Log(message) \
+    do { \
+        std::cout << BLUE << BOLD << "[Log] " << RESET << BLUE << message << RESET << std::endl; \
     } while (0);

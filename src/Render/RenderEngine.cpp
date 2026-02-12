@@ -51,25 +51,8 @@ bool RenderEngine::Init(int _width, int _height, HWND _handle)
 	r = m_desc->InitCBV(m_renderDevice->GDevice()); Log(r, "Initializing CBV")
 	r = m_pipelineStateObject->Init(m_renderDevice->GDevice()); Log(r, "Initializing PSO")
 	r = m_fence->Init(m_renderDevice->GDevice()); Log(r, "Initializing Fence")
-	Resize(_width, _height);
+	r = Resize(_width, _height); Log(r,"Resizing")
 	r = m_sceneCB->Init(m_renderDevice->GDevice(), m_desc->GcbvHeap(), 0); Log(r, "Initializing Scene Constant Buffer")
-		if (m_sceneCB->Init(m_renderDevice->GDevice(), m_desc->GcbvHeap(), 0))
-		{
-			DebugMsg("Failed to initialize scene constant buffer", DebugFlag::WARNING);
-		}
-
-	m_commandContext->GCommandAllocator()->Reset();
-	m_commandContext->GCommandList()->Reset(m_commandContext->GCommandAllocator(), nullptr);
-
-	Geometry geo;
-	geo.BuildBox();
-	m_quadMesh = new Mesh(geo);
-	//AddMeshToDraw(m_quadMesh);
-
-	m_commandContext->CloseAndExecute(m_queue);
-
-	FlushCommandQueue();
-
 	return 0;
 }
 
@@ -304,7 +287,7 @@ bool RenderEngine::InitQueue()
 	HRESULT hr = m_renderDevice->GDevice()->CreateCommandQueue(&queueDesc, IID_PPV_ARGS(&m_queue));
 	if (FAILED(hr))
 	{
-		std::cout << "Command Queue creation failed" << std::endl;
+		Log(true, "Failed to create command queue")
 		return 1;
 	}
 	return 0;

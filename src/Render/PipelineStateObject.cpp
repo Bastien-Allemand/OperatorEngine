@@ -26,7 +26,7 @@ bool PipelineStateObject::Init(ID3D12Device* _device)
 	HRESULT hr = _device->CreateGraphicsPipelineState(&psoDesc, IID_PPV_ARGS(&m_pipelineState));
 	if (FAILED(hr))
 	{
-		std::cout << "Failed to create pipeline state object" << std::endl;
+		Log(true, "Failed to create graphics pipeline state");
 		return 1;
 	}
 
@@ -44,7 +44,7 @@ bool PipelineStateObject::InitRootSig(ID3D12Device* _device)
 
 	if (FAILED(hr))
 	{
-		std::cout << "Failed to serialize root signature" << std::endl;
+		Log(true, "Failed to serialize root signature");
 		if (errorBlob)
 		{
 			std::cout << "Error: " << (char*)errorBlob->GetBufferPointer() << std::endl;
@@ -55,7 +55,7 @@ bool PipelineStateObject::InitRootSig(ID3D12Device* _device)
 	hr = _device->CreateRootSignature(0, serializedRootSig->GetBufferPointer(), serializedRootSig->GetBufferSize(), IID_PPV_ARGS(&m_rootSig));
 	if (FAILED(hr))
 	{
-		std::cout << "Failed to create root signature" << std::endl;
+		Log(true, "Failed to create root signature");
 		return 1;
 	}
 	return 0;
@@ -68,7 +68,7 @@ bool PipelineStateObject::InitVs(D3D12_GRAPHICS_PIPELINE_STATE_DESC* _desc, cons
 
 	if (m_vertexShader == nullptr)
 	{
-		std::cout << "Vertex shader compilation failed" << std::endl;
+		Log(true, "Vertex shader compilation failed");
 		return 1;
 	}
 	_desc->VS = { m_vertexShader->GetBufferPointer(), m_vertexShader->GetBufferSize() }; // if bug try casting to byte but it should work as is
@@ -81,7 +81,7 @@ bool PipelineStateObject::InitPs(D3D12_GRAPHICS_PIPELINE_STATE_DESC* _desc, cons
 
 	if (m_pixelShader == nullptr)
 	{
-		std::cout << "Pixel shader compilation failed" << std::endl;
+		Log(true, "Pixel shader compilation failed");
 		return 1;
 	}
 	_desc->PS = { m_pixelShader->GetBufferPointer(), m_pixelShader->GetBufferSize() }; // if bug try casting to byte but it should work as is

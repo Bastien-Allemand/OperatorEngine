@@ -34,6 +34,7 @@ void App::Initialize(int _width,int _height)
 		dwMode |= ENABLE_VIRTUAL_TERMINAL_PROCESSING;
 		SetConsoleMode(hOut, dwMode);
 		Log(!r && !r2, "Console Initializing");
+
 	#endif
 	m_window = new Window;
 	r = m_window->Init(_width, _height, L"ENETRE", WndProc);

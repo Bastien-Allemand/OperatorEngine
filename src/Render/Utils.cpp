@@ -14,7 +14,7 @@ ID3DBlob* Utils::CompileShader(const WString& _filename, const D3D_SHADER_MACRO*
 
 	if (FAILED(hr))
 	{
-		std::cout << "Shader Compilation Failed" << std::endl;
+		Log(true, "Failed to compile shader");
 		if (errors != nullptr)
 		{
 			std::cout << "Error: " << (char*)errors->GetBufferPointer() << std::endl;

@@ -23,7 +23,7 @@ bool SwapChain::Init(int _width, int _height, HWND _handle, IDXGIFactory4* _fact
 	HRESULT hr = _factory->CreateSwapChainForHwnd(_queue, _handle, &swapChainDesc,nullptr, nullptr, &tempSwapChain);
 	if (FAILED(hr))
 	{
-		std::cout << "Failed to Build SwapChain" << std::endl;
+		Log(true, "Failed to create swapchain for hwnd");
 		return 1;
 	}
 
@@ -31,7 +31,7 @@ bool SwapChain::Init(int _width, int _height, HWND _handle, IDXGIFactory4* _fact
 	hr = tempSwapChain->QueryInterface(IID_PPV_ARGS(&swapchainref)); // because i need acces to GetCurrentBackBufferIndex() so i cast to newer version
 	if (FAILED(hr))
 	{
-		std::cout << "Failed to cast swapchain to version 3" << std::endl;
+		Log(true, "Failed to query swapchain for IDXGISwapChain3 interface");
 		return 1;
 	}
 

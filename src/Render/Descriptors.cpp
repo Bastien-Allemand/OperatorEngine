@@ -10,13 +10,13 @@ bool Descriptors::InitRTV(ID3D12Device* _device)
 	HRESULT hr = _device->CreateDescriptorHeap(&rtvHeapDesc, IID_PPV_ARGS(&m_rtvHeap));
 	if (FAILED(hr))
 	{
-		std::cout << "Failed to create RTV descriptor heap" << std::endl;
+		Log(true, "Failed to create RTV descriptor heap");
 		return 1;
 	}
 	hr = m_rtvDescriptorSize = _device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
 	if (FAILED(hr))
 	{
-		std::cout << "Failed to get RTV descriptor size" << std::endl;
+		Log(true, "Failed to get RTV descriptor size");
 		return 1;
 	}
 	CD3DX12_CPU_DESCRIPTOR_HANDLE rtvHandle(m_rtvHeap->GetCPUDescriptorHandleForHeapStart());
@@ -33,13 +33,13 @@ bool Descriptors::InitDSV(ID3D12Device* _device)
 	HRESULT hr = _device->CreateDescriptorHeap(&dsvHeapDesc, IID_PPV_ARGS(&m_dsvHeap));
 	if (FAILED(hr))
 	{
-		std::cout << "Failed to create DSV descriptor heap" << std::endl;
+		Log(true, "Failed to create DSV descriptor heap");
 		return 1;
 	}
 	hr = m_dsvDescriptorSize = _device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_DSV);
 	if (FAILED(hr))
 	{
-		std::cout << "Failed to get DSV descriptor size" << std::endl;
+		Log(true, "Failed to get DSV descriptor size");
 		return 1;
 	}
 	CD3DX12_CPU_DESCRIPTOR_HANDLE rtvHandle(m_rtvHeap->GetCPUDescriptorHandleForHeapStart());
@@ -56,12 +56,14 @@ bool Descriptors::InitCBV(ID3D12Device* _device)
 	HRESULT hr = _device->CreateDescriptorHeap(&cbvHeapDesc, IID_PPV_ARGS(&m_cbvheap));
 	if (FAILED(hr))
 	{
-		DebugMsg("Failed to create CBV descriptor heap", DebugFlag::ERROR_);
+		Log(true, "Failed to create CBV descriptor heap"); 
+		return 1;
 	}
 	//hr = m_rtvDescriptorSize = _device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 	if (FAILED(hr))
 	{
-		DebugMsg("Failed to get CBV descriptor size", DebugFlag::ERROR_);
+		Log(true, "Failed to get CBV descriptor size"); 
+		return 1;
 	}
 	return 0;
 }
