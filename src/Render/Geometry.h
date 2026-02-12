@@ -3,7 +3,8 @@
 struct vertex
 {
 	Vector3f pos;
-	Vector4f color;
+	Vector3f normal;
+	Vector2f tex;
 };
 
 class Geometry

@@ -53,6 +53,8 @@ bool RenderEngine::Init(int _width, int _height, HWND _handle)
 	r = m_fence->Init(m_renderDevice->GDevice()); Log(r, "Initializing Fence")
 	r = Resize(_width, _height); Log(r,"Resizing")
 	r = m_sceneCB->Init(m_renderDevice->GDevice(), m_desc->GcbvHeap(), 0); Log(r, "Initializing Scene Constant Buffer")
+	r = m_lightCB->Init(m_renderDevice->GDevice(), m_desc->GcbvHeap(), 1); Log(r, "Initializing Light Constant Buffer")
+	m_lightCB->CopyData(0, m_lightData);
 	return 0;
 }
 
@@ -67,18 +69,20 @@ void RenderEngine::Update(float dt)
 	DirectX::XMMATRIX view = DirectX::XMMatrixLookAtLH(pos, target, up);
 
 	DirectX::XMStoreFloat4x4(&m_view, view);
-	DirectX::XMMATRIX world = XMLoadFloat4x4(&m_world);
+	DirectX::XMMATRIX world = DirectX::XMLoadFloat4x4(&m_world);
 
 	world = world * DirectX::XMMatrixRotationZ(dt);
 	world = world * DirectX::XMMatrixRotationY(dt);
 	world = world * DirectX::XMMatrixRotationX(dt);
 	DirectX::XMStoreFloat4x4(&m_world, world);
-	DirectX::XMMATRIX proj = XMLoadFloat4x4(&m_proj);
+	DirectX::XMMATRIX proj = DirectX::XMLoadFloat4x4(&m_proj);
 	SceneConstantBuffer cb;
-	DirectX::XMMATRIX worldViewProj = world * view * proj;
-	XMStoreFloat4x4(&cb.gWorldViewProj, XMMatrixTranspose(worldViewProj));
+	DirectX::XMMATRIX viewProj = view * proj;
+	DirectX::XMStoreFloat4x4(&cb.gViewProj, DirectX::XMMatrixTranspose(viewProj));
+	DirectX::XMStoreFloat4x4(&cb.gWorld, DirectX::XMMatrixTranspose(world));
 
 	m_sceneCB->CopyData(0, cb);
+
 }
 
 void RenderEngine::Draw()
@@ -110,6 +114,7 @@ void RenderEngine::Draw()
 	list->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
 	list->SetGraphicsRootConstantBufferView(0, m_sceneCB->GetAddress());
+	list->SetGraphicsRootConstantBufferView(1, m_lightCB->GetAddress());
 
 	for (int i = 0; i < m_meshes.size(); i++)
 	{
@@ -272,11 +277,21 @@ void RenderEngine::HardInit()
 	m_desc = new Descriptors();
 	m_renderTarget = new RenderTarget();
 	m_sceneCB = new ConstantBuffer<SceneConstantBuffer>();
-
+	m_lightCB = new ConstantBuffer<LightData>();
 	DirectX::XMMATRIX world = DirectX::XMMatrixIdentity();
 	DirectX::XMStoreFloat4x4(&m_world, world);
 	DirectX::XMStoreFloat4x4(&m_view, world);
 	DirectX::XMStoreFloat4x4(&m_proj, world);
+
+	DirectionalLight passData;
+	passData.Ambient = { 0.1f, 0.1f, 0.1f, 1.0f };
+	passData.Diffuse = { 0.8f, 0.8f, 0.8f, 1.0f };
+	passData.Direction = { 0.577f, -0.577f, 0.577f };
+	LightData data;
+	data.DirLight = passData;
+	data.EyePosW = { 0, 0, -5 };
+
+	m_lightData = data;
 }
 
 bool RenderEngine::InitQueue()

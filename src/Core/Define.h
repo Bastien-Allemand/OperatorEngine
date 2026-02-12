@@ -3,9 +3,9 @@
 #include <string>
 #include <iostream>
 #include <vector>
-#include <iostream>
 #include <cstdlib>
 #include <array>
+#include <unordered_map>
 
 #define RESET   "\033[0m"
 #define RED     "\033[31m"
@@ -48,6 +48,8 @@ using WString = std::wstring;
 template<typename T>
 using Vector = std::vector<T>;
 
+template<typename Key, typename Value>
+using UnOrderedMap = std::unordered_map<Key, Value>;
 
 enum class DebugFlag {
     LOG,  

@@ -34,8 +34,10 @@ bool PipelineStateObject::Init(ID3D12Device* _device)
 }
 bool PipelineStateObject::InitRootSig(ID3D12Device* _device)
 {
-	CD3DX12_ROOT_PARAMETER rootParameters[1];
+	CD3DX12_ROOT_PARAMETER rootParameters[2];
 	rootParameters[0].InitAsConstantBufferView(0); //register b0
+	rootParameters[1].InitAsConstantBufferView(1); //register b1
+
 	CD3DX12_ROOT_SIGNATURE_DESC rootSigDesc;
 	rootSigDesc.Init(_countof(rootParameters), rootParameters, 0, nullptr, D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT);
 	ID3DBlob* serializedRootSig = nullptr;
@@ -92,8 +94,9 @@ bool PipelineStateObject::InitInputLayout(D3D12_GRAPHICS_PIPELINE_STATE_DESC* _d
 {
 	m_inputLayout = 
 	{
-		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
-		{ "COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 12, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 }
+		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0,  D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
+		{ "NORMAL",   0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 12, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
+		{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT,    0, 24, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 }
 	};
 
 	_desc->InputLayout = { m_inputLayout.data(), (UINT)m_inputLayout.size() };
