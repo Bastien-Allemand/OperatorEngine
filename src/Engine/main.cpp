@@ -12,8 +12,7 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR cmdLine, int cmdS
     InputComponent& inp1 = gameManager->AddComponant<InputComponent>(entity1);
     TransformSystem& transSys = gameManager->AddSystem<TransformSystem>(entity1);
     InputSystem& inputSys = gameManager->AddSystem<InputSystem>(entity1);
-    Transform& res = gameManager->GetComponant<Transform>(entity1);
-    std::cout << "Pos Z apres Input: " << res.position.z << std::endl;
+
 
 
     // partie Loïc
@@ -36,6 +35,10 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR cmdLine, int cmdS
     TransformComponant& retrievedTransform2 = gameManager->GetComponant<TransformComponant>(entity5);
     TransformComponant& retrievedTransform3 = gameManager->GetComponant<TransformComponant>(entity6);
 
+
+
+    TransformComponant& res = gameManager->GetComponant<TransformComponant>(entity1);
+    std::cout << "Pos Z apres Input: " << res.worldtransform.position.z << std::endl;
 
         // Test pour voir si �a marche
         std::cout << "Position X : " << retrievedTransform1.position.x << std::endl;
