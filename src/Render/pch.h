@@ -4,7 +4,7 @@
 #include <windows.h>
 #include <iostream>
 #include "../Core/Define.h"
-
+#include "DirectXCollision.h"
 #include <d3d12.h>
 #include <d3dcompiler.h>
 #include <DirectXMath.h>

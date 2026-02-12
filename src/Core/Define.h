@@ -1,9 +1,17 @@
 #pragma once
 #include <DirectXMath.h>
 #include <string>
+#include <iostream>
 #include <vector>
 #include <iostream>
 #include <cstdlib>
+#include <array>
+
+#define RESET   "\033[0m"
+#define RED     "\033[31m"
+#define GREEN   "\033[32m"
+#define BLUE    "\033[34m"
+#define BOLD    "\033[1m"
 
 using int8 = __int8;
 using int16 = __int16;
@@ -11,7 +19,6 @@ using int32 = __int32;
 using int64 = __int64;
 using int32_t = __int32;
 
-using byte = unsigned char;
 using uint8 = unsigned __int8;
 using uint16 = unsigned __int16;
 using uint32 = unsigned __int32;
@@ -41,19 +48,33 @@ using WString = std::wstring;
 template<typename T>
 using Vector = std::vector<T>;
 
+
 enum class DebugFlag {
-    Info,
-    Warning,
-    Error
+    LOG,  
+    WARNING, 
+    ERROR_   
 };
 
-
-#define DEBUG_MESSAGE(msg, flag) \
+#define DebugMsg(msg, flag) \
     do { \
-        if (flag == DebugFlag::Error) { \
+        if (flag == DebugFlag::ERROR_) { \
             std::wcerr << L"[CRITICAL ERROR] " << msg << std::endl; \
             std::abort(); \
         } else { \
             std::wcout << L"[LOG] " << msg << std::endl; \
         } \
     } while(0)
+
+#define Log(condition, message)                                                                          \
+    do {                                                                                                 \
+        if (condition) {                                                                                 \
+            std::cerr << RED << BOLD << "[ERROR] " << RESET << RED << message << RESET << std::endl;    \
+        } else {                                                                                         \
+            std::cout << GREEN << BOLD << "[Valid] " << RESET << GREEN << message << RESET << std::endl; \
+        }                                                                                                \
+    } while (0);
+
+#define _Log(message) \
+    do { \
+        std::cout << BLUE << BOLD << "[Log] " << RESET << BLUE << message << RESET << std::endl; \
+    } while (0);
