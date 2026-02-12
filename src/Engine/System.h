@@ -14,6 +14,8 @@ public:
     virtual void Update(float deltaTime) = 0;
 	virtual void AddEntity(UINT entityId);
 
+    Entity* GetEntity(UINT id);
+
     UINT id;
 
 	std::vector<Entity*> m_entitiesss; // Liste des entités que ce système gère
@@ -22,16 +24,16 @@ protected:
     std::vector<UINT> m_entities; // Liste des entités que ce système gère
 };
 
-class TransformSystem : public System
-{
-public:
-    TransformSystem() = default;
-    void Update(float deltaTime) override;
-	void AddChildren(Transform& child);
-	void AddParent(Transform& Parent);
-
-    void Move();
-};
+//class TransformSystem : public System
+//{
+//public:
+//    TransformSystem() = default;
+//    void Update(float deltaTime) override;
+//	void AddChildren(Transform& child);
+//	void AddParent(Transform& Parent);
+//
+//    void Move();
+//};
 
 class InputSystem : public System
 {

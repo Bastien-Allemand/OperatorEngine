@@ -172,19 +172,19 @@ inline S& GameManager::AddSystem(UINT entity)
 	return *newSystem;
 }
 
-template<typename S>
-inline S& GameManager::AddSystem(Entity* entity)
+template<typename NewSystem>
+inline NewSystem& GameManager::AddSystem(Entity* entity)
 {
 	for (auto& basePtr : m_systems) {
 
-		S* derived = dynamic_cast<S*>(basePtr);
+		NewSystem* derived = dynamic_cast<NewSystem*>(basePtr);
 
 		if (derived != nullptr) {
 			basePtr->m_entitiesss.push_back(entity);
 			return *derived;
 		}
 	}
-	S* newSystem = new S;
+	NewSystem* newSystem = new NewSystem;
 	newSystem->m_entitiesss.push_back(entity);
 	m_systems.push_back(newSystem);
 	return *newSystem;

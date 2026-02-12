@@ -2,6 +2,7 @@
 #include "main.h"
 #include "GameManager.h"
 #include "Entity.h"
+#include "GameTransform.h"
 // Assurez-vous que Transform est défini ou inclus
 
 int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR cmdLine, int cmdShow)
@@ -21,8 +22,8 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR cmdLine, int cmdS
     TransformSystem& transformSystem2 = gameManager->AddSystem<TransformSystem>(entity2);
     TransformSystem& transformSystem3 = gameManager->AddSystem<TransformSystem>(entity3);
 
-	//transformSystem.AddChildren(b);
-
+	transformSystem.AddChildren(entity2, entity3);
+    transformSystem.Move();
     gameManager->Update();
     Transform& retrievedTransform1 = gameManager->GetComponant<Transform>(entity1);
     Transform& retrievedTransform2 = gameManager->GetComponant<Transform>(entity2);
