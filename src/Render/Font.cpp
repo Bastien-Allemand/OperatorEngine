@@ -4,15 +4,10 @@
 #include "PipelineStateObject2D.h"
 #include "SwapChain.h"
 #include "d3dx12.h"
-
-Font::Font()
-{
-	m_fontCB = new ConstantBuffer<FontConstantBuffer>();
-}
+#include <fstream>
 
 Font::~Font()
 {
-	delete m_fontCB;
 	if (m_texture) m_texture->Release();
 	if (m_textureUpload) m_textureUpload->Release();
 	if (m_vGPUBuffer) m_vGPUBuffer->Release();
@@ -21,7 +16,7 @@ Font::~Font()
 	if (m_iUpload) m_iUpload->Release();
 }
 
-bool Font::Init(ID3D12Device* _device, ID3D12GraphicsCommandList* _cmdList, ID3D12DescriptorHeap* _heap, uint32 _cbvIndex, WString _texturePath, int32 _rows, int32 _cols)
+bool Font::Init(ID3D12Device* _device, ID3D12GraphicsCommandList* _cmdList, WString _texturePath, int32 _rows, int32 _cols)
 {
 	m_rows = _rows;
 	m_cols = _cols;
@@ -72,12 +67,6 @@ bool Font::Init(ID3D12Device* _device, ID3D12GraphicsCommandList* _cmdList, ID3D
 		{{0.0f, 0.0f, 0.0f}, {0.0f, 0.0f}}
 	};
 	m_indices = { 0, 1, 2, 0, 2, 3 };
-
-	if (m_fontCB->Init(_device, _heap, _cbvIndex))
-	{
-		DebugMsg(L"Failed to init font constant buffer", DebugFlag::ERROR_);
-		return false;
-	}
 
 	InitDefaultASCII();
 
@@ -140,59 +129,59 @@ void Font::Bind(ID3D12GraphicsCommandList* _list)
 	_list->IASetIndexBuffer(&ibv);
 }
 
-void Font::DrawString(ID3D12GraphicsCommandList* _cmdList, PipelineStateObject2D* _pso, SwapChain* _swapChain,
-	ID3D12DescriptorHeap* _srvHeap, String _text, float32 _x, float32 _y, float32 _size)
-{
-	_cmdList->SetPipelineState(_pso->GPipelineState());
-	_cmdList->SetGraphicsRootSignature(_pso->GRootSig());
-	_cmdList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-
-	ID3D12DescriptorHeap* heaps[] = { _srvHeap };
-	_cmdList->SetDescriptorHeaps(1, heaps);
-	_cmdList->SetGraphicsRootDescriptorTable(1, _srvHeap->GetGPUDescriptorHandleForHeapStart());
-
-	DirectX::XMMATRIX ortho = DirectX::XMMatrixOrthographicOffCenterLH(
-		0.0f, _swapChain->GViewport()->Width,
-		_swapChain->GViewport()->Height, 0.0f,
-		0.0f, 1.0f);
-
-	Bind(_cmdList);
-
-	float32 cursorX = _x;
-
-	for (char c : _text)
-	{
-		if (c == ' ')
-		{
-			cursorX += _size * 0.5f;
-			continue;
-		}
-
-		if (m_alphabet.find(c) == m_alphabet.end())
-			continue;
-
-		charDefinition& def = m_alphabet[c];
-
-		float32 charWidth = _size * def.aspectRatio;
-		float32 charHeight = _size;
-
-		DirectX::XMMATRIX scale = DirectX::XMMatrixScaling(charWidth, charHeight, 1.0f);
-		DirectX::XMMATRIX translation = DirectX::XMMatrixTranslation(cursorX, _y, 0.0f);
-		DirectX::XMMATRIX world = scale * translation;
-		DirectX::XMMATRIX worldViewProj = world * ortho;
-
-		FontConstantBuffer cbData;
-		DirectX::XMStoreFloat4x4(&cbData.gWorld, DirectX::XMMatrixTranspose(worldViewProj));
-		cbData.uvOffset = { def.u, def.v, def.width, def.height };
-
-		m_fontCB->CopyData(0, cbData);
-		_cmdList->SetGraphicsRootConstantBufferView(0, m_fontCB->GetAddress());
-
-		_cmdList->DrawIndexedInstanced(static_cast<UINT>(m_indices.size()), 1, 0, 0, 0);
-
-		cursorX += charWidth + (def.advanceX * _size);
-	}
-}
+//void Font::DrawString(ID3D12GraphicsCommandList* _cmdList, PipelineStateObject2D* _pso, SwapChain* _swapChain,
+//	ID3D12DescriptorHeap* _srvHeap, String _text, float32 _x, float32 _y, float32 _size)
+//{
+//	_cmdList->SetPipelineState(_pso->GPipelineState());
+//	_cmdList->SetGraphicsRootSignature(_pso->GRootSig());
+//	_cmdList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+//
+//	ID3D12DescriptorHeap* heaps[] = { _srvHeap };
+//	_cmdList->SetDescriptorHeaps(1, heaps);
+//	_cmdList->SetGraphicsRootDescriptorTable(1, _srvHeap->GetGPUDescriptorHandleForHeapStart());
+//
+//	DirectX::XMMATRIX ortho = DirectX::XMMatrixOrthographicOffCenterLH(
+//		0.0f, _swapChain->GViewport()->Width,
+//		_swapChain->GViewport()->Height, 0.0f,
+//		0.0f, 1.0f);
+//
+//	Bind(_cmdList);
+//
+//	float32 cursorX = _x;
+//
+//	for (char c : _text)
+//	{
+//		if (c == ' ')
+//		{
+//			cursorX += _size * 0.5f;
+//			continue;
+//		}
+//
+//		if (m_alphabet.find(c) == m_alphabet.end())
+//			continue;
+//
+//		charDefinition& def = m_alphabet[c];
+//
+//		float32 charWidth = _size * def.aspectRatio;
+//		float32 charHeight = _size;
+//
+//		DirectX::XMMATRIX scale = DirectX::XMMatrixScaling(charWidth, charHeight, 1.0f);
+//		DirectX::XMMATRIX translation = DirectX::XMMatrixTranslation(cursorX, _y, 0.0f);
+//		DirectX::XMMATRIX world = scale * translation;
+//		DirectX::XMMATRIX worldViewProj = world * ortho;
+//
+//		FontConstantBuffer cbData;
+//		DirectX::XMStoreFloat4x4(&cbData.gWorld, DirectX::XMMatrixTranspose(worldViewProj));
+//		cbData.uvOffset = { def.u, def.v, def.width, def.height };
+//
+//		m_fontCB->CopyData(0, cbData);
+//		_cmdList->SetGraphicsRootConstantBufferView(0, m_fontCB->GetAddress());
+//
+//		_cmdList->DrawIndexedInstanced(uint32 (m_indices.size()), 1, 0, 0, 0);
+//
+//		cursorX += charWidth + (def.advanceX * _size);
+//	}
+//}
 
 void Font::UploadVertex(ID3D12Device* _rd, ID3D12GraphicsCommandList* _list)
 {
@@ -258,4 +247,42 @@ ID3D12Resource* Font::CreateDefaultBuffer(ID3D12Device* _rd, ID3D12GraphicsComma
 	_list->ResourceBarrier(1, &barrier2);
 
 	return defaultBuffer;
+}
+
+bool Font::Load(Font& _font, WString _texturePath, WString _dataPath)
+{
+	std::wifstream file(_dataPath);
+	if (!file.is_open())
+	{
+		Log(true,"Failed to open font data file");
+		return 1;
+	}
+
+	float32 texWidth = 256.0f;
+	float32 texHeight = 256.0f;
+
+	WString line;
+	while (std::getline(file, line))
+	{
+		if (line.substr(0, 5) == L"char ")
+		{
+			int id, x, y, width, height, xadvance;
+			if (swscanf_s(line.c_str(), L"char id=%d x=%d y=%d width=%d height=%d xoffset=%*d yoffset=%*d xadvance=%d",
+				&id, &x, &y, &width, &height, &xadvance) == 6)
+			{
+				float u = (float)x / texWidth;
+				float v = (float)y / texHeight;
+				float wUV = (float)width / texWidth;
+				float hUV = (float)height / texHeight;
+				_font.AddCharacter(id, u, v, wUV, hUV, xadvance);
+			}
+		}
+		else if (line.substr(0, 7) == L"common ")
+		{
+			swscanf_s(line.c_str(), L"common lineHeight=%*d base=%*d scaleW=%f scaleH=%f", &texWidth, &texHeight);
+		}
+	}
+	file.close();
+	Log(false, "Font data loaded successfully");
+	return 0;
 }

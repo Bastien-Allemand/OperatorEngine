@@ -117,7 +117,7 @@ void RenderEngine::Draw()
 	list->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
 	list->SetGraphicsRootConstantBufferView(0, m_sceneCB->GetAddress());
-	list->SetGraphicsRootConstantBufferView(1, m_lightCB->GetAddress());
+	list->SetGraphicsRootConstantBufferView(1, m_lightCB->GetAddress());	
 
 	for (int i = 0; i < m_meshes.size(); i++)
 	{
@@ -125,8 +125,9 @@ void RenderEngine::Draw()
 		m_meshes[i]->Bind(list);
 		list->DrawIndexedInstanced(m_meshes[i]->GetIndexCount(), 1, 0, 0, 0);
 	}
+
 	m_font->Upload(m_renderDevice->GDevice(), list);
-	m_font->DrawString(list, m_pso2D, m_swapChain, m_fontSrvHeap, "Hello DirectX 12!", 50.0f, 50.0f, 24.0f);
+	DrawString("He rg  er?./з%иг╡", 50.0f, 50.0f, 70.0f);
 
 	barrier = CD3DX12_RESOURCE_BARRIER::Transition(m_renderTarget->GCurrentBackBuffer(),
 		D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT);
@@ -329,33 +330,96 @@ bool RenderEngine::InitFont()
 	m_commandContext->GCommandList()->Reset(m_commandContext->GCommandAllocator(), nullptr);
 
 	m_font = new Font();
-	if (!m_font->Init(m_renderDevice->GDevice(), m_commandContext->GCommandList(), m_desc->GcbvHeap(), 2,
+	if (!m_font->Init(m_renderDevice->GDevice(), m_commandContext->GCommandList(),
 		L"../../res/Render/arial.dds", 8, 16))
 	{
 		Log(true, "Failed to init font");
 		return 1;
 	}
+	
+	m_font->Load(*m_font, L"../../res/Render/arial.dds", L"../../res/Render/arial.fnt");
+
 	m_commandContext->CloseAndExecute(m_queue);
 	FlushCommandQueue();
 
 	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
 	srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-	srvDesc.Format = m_font->GetTexture()->GetDesc().Format;
+	srvDesc.Format = m_font->GTexture()->GetDesc().Format;
 	srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
-	srvDesc.Texture2D.MipLevels = m_font->GetTexture()->GetDesc().MipLevels;
+	srvDesc.Texture2D.MipLevels = m_font->GTexture()->GetDesc().MipLevels;
 
 	m_renderDevice->GDevice()->CreateShaderResourceView(
-		m_font->GetTexture(),
+		m_font->GTexture(),
 		&srvDesc,
 		m_fontSrvHeap->GetCPUDescriptorHandleForHeapStart());
 
 	return 0;
 }
 
-void RenderEngine::DrawString()
+void RenderEngine::DrawString(String _text, float32 _x, float32 _y, float32 _size)
 {
-	auto list = m_commandContext->GCommandList();
-	m_font->Upload(m_renderDevice->GDevice(), list);
-	m_font->DrawString(list, m_pso2D, m_swapChain, m_fontSrvHeap,
-		"Hello World!", 100.0f, 100.0f, 32.0f);
+	m_commandContext->GCommandList()->SetPipelineState(m_pso2D->GPipelineState());
+	m_commandContext->GCommandList()->SetGraphicsRootSignature(m_pso2D->GRootSig());
+	m_commandContext->GCommandList()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+	ID3D12DescriptorHeap* heaps[] = { m_fontSrvHeap };
+	m_commandContext->GCommandList()->SetDescriptorHeaps(1, heaps);
+	m_commandContext->GCommandList()->SetGraphicsRootDescriptorTable(1, m_fontSrvHeap->GetGPUDescriptorHandleForHeapStart());
+
+	DirectX::XMMATRIX ortho = DirectX::XMMatrixOrthographicOffCenterLH(
+		0.0f, m_swapChain->GViewport()->Width,
+		m_swapChain->GViewport()->Height, 0.0f,
+		0.0f, 1.0f);
+	
+	m_font->Bind(m_commandContext->GCommandList());
+
+	float32 cursorX = _x;
+
+	for (char c : _text)
+	{
+		charDefinition def;
+
+		if (m_font->GAlphabet().find(c) == m_font->GAlphabet().end())
+		{
+			def = m_font->GAlphabet().at('@');
+		}
+		else
+		{
+			def = m_font->GAlphabet().at(c);
+		}		 
+
+		float32 charWidth = _size * def.aspectRatio;
+		float32 charHeight = _size;
+
+		DirectX::XMMATRIX scale = DirectX::XMMatrixScaling(charWidth, charHeight, 1.0f);
+		DirectX::XMMATRIX translation = DirectX::XMMatrixTranslation(cursorX, _y, 0.0f);
+		DirectX::XMMATRIX world = scale * translation;
+		DirectX::XMMATRIX worldViewProj = world * ortho;
+
+		FontConstantBuffer cbData;
+		DirectX::XMStoreFloat4x4(&cbData.gWorld, DirectX::XMMatrixTranspose(worldViewProj));
+		cbData.uvOffset = { def.u, def.v, def.width, def.height };
+
+		if (m_fontCBIndex >= m_fontCB.size())
+		{
+			m_fontCB.push_back(new ConstantBuffer<FontConstantBuffer>());
+			m_fontCB.back()->Init(m_renderDevice->GDevice(), m_desc->GcbvHeap(), 2 + m_fontCBIndex);
+		}
+
+		m_fontCB[m_fontCBIndex]->CopyData(0, cbData);
+		m_commandContext->GCommandList()->SetGraphicsRootConstantBufferView(0, m_fontCB[m_fontCBIndex]->GetAddress());
+
+		m_commandContext->GCommandList()->DrawIndexedInstanced(m_font->GIndexCount(), 1, 0, 0, 0);
+
+		m_fontCBIndex++;
+
+		if (c == ' ')
+		{
+			cursorX += _size * 0.5f;
+		}
+		else
+		{
+			cursorX += def.advanceX * _size / 32;
+		}
+	}
 }

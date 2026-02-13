@@ -4,7 +4,6 @@
 #include <iostream>
 #include <vector>
 #include <cstdlib>
-#include <map>
 #include <array>
 #include <unordered_map>
 
@@ -48,8 +47,6 @@ using WString = std::wstring;
 
 template<typename T>
 using Vector = std::vector<T>;
-template<typename T>
-using CharMap = std::map<char, T>;
 
 template<typename Key, typename Value>
 using UnOrderedMap = std::unordered_map<Key, Value>;

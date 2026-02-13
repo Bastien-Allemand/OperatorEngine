@@ -6,19 +6,23 @@ class PipelineStateObject2D;
 class SwapChain;
 struct SubmeshGeometry;
 
-struct FontConstantBuffer
+struct charDefinition
 {
-	Matrix4x4f gWorld;
-	Vector4f uvOffset; // x=u, y=v, z=width, w=height
+	float32 u;
+	float32 v;
+	float32 width;
+	float32 height;
+	float32 aspectRatio;
+	int32 advanceX;
 };
 
 class Font
 {
 public:
-	Font();
+	Font() = default;
 	~Font();
 
-	bool Init(ID3D12Device* _device, ID3D12GraphicsCommandList* _cmdList, ID3D12DescriptorHeap* _heap, uint32 _cbvIndex, WString _texturePath, int32 _rows, int32 _cols);
+	bool Init(ID3D12Device* _device, ID3D12GraphicsCommandList* _cmdList, WString _texturePath, int32 _rows, int32 _cols);
 
 	void AddCharacter(char _character, float32 _u, float32 _v, float32 _width, float32 _height, int32 _advanceX);
 
@@ -27,12 +31,14 @@ public:
 	bool Upload(ID3D12Device* _rd, ID3D12GraphicsCommandList* _list);
 	void Bind(ID3D12GraphicsCommandList* _list);
 
-	void DrawString(ID3D12GraphicsCommandList* _cmdList, PipelineStateObject2D* _pso, SwapChain* _swapChain,
-		ID3D12DescriptorHeap* _srvHeap, String _text, float32 _x, float32 _y, float32 _size);
+	/*void DrawString(ID3D12GraphicsCommandList* _cmdList, PipelineStateObject2D* _pso, SwapChain* _swapChain,
+		ID3D12DescriptorHeap* _srvHeap, String _text, float32 _x, float32 _y, float32 _size);*/
 
-	size_t GetIndexCount() const { return m_indices.size(); }
+	size_t GIndexCount() const { return m_indices.size(); }
+	ID3D12Resource* GTexture() { return m_texture; }
+	const UnOrderedMap<int, charDefinition>& GAlphabet() const { return m_alphabet; }
 
-	ID3D12Resource* GetTexture() { return m_texture; }
+	bool Load(Font& _font, WString _texturePath, WString _dataPath);
 
 private:
 	void UploadVertex(ID3D12Device* _rd, ID3D12GraphicsCommandList* _list);
@@ -64,24 +70,12 @@ private:
 	{
 		Vector3f pos;
 		Vector2f uv;
-	};
+	};	
 
-	struct charDefinition
-	{
-		float32 u;
-		float32 v;
-		float32 width;
-		float32 height;
-		float32 aspectRatio;
-		int32 advanceX;
-	};
-
-	CharMap<charDefinition> m_alphabet;
+	UnOrderedMap<int, charDefinition> m_alphabet;
 	Vector<fontVertex> m_vertices;
 	Vector<uint32> m_indices;
 
 	bool m_isUploaded = false;
-
-	ConstantBuffer<FontConstantBuffer>* m_fontCB = nullptr;
 };
 

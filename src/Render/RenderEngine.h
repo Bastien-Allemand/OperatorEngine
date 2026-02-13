@@ -11,6 +11,7 @@ class RenderTarget;
 class CommandContext;
 class PipelineStateObject;
 class PipelineStateObject2D;
+
 template<typename T>
 class ConstantBuffer;
 
@@ -30,6 +31,12 @@ struct LightData
 	DirectionalLight DirLight;
 	Vector3f EyePosW;
 };
+struct FontConstantBuffer
+{
+	Matrix4x4f gWorld;
+	Vector4f uvOffset;
+};
+
 
 class RenderEngine
 {
@@ -65,6 +72,9 @@ private:
 	ConstantBuffer<SceneConstantBuffer>* m_sceneCB = nullptr;
 	ConstantBuffer<LightData>* m_lightCB = nullptr;
 
+	Vector<ConstantBuffer <FontConstantBuffer>*> m_fontCB;
+	int m_fontCBIndex = 0;
+
 	Mesh* m_quadMesh = nullptr;
 
 	Matrix4x4f m_world;
@@ -79,6 +89,6 @@ private:
 	void HardInit();
 	bool InitQueue();
 	bool InitFont();
-	void DrawString();
+	void DrawString(String _text, float32 _x, float32 _y, float32 _size);
 };
 
