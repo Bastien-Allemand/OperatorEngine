@@ -5,6 +5,7 @@
 #include "Render/RenderEngine.h"
 #include "Render/Geometry.h"
 #include "Render/Mesh.h"
+#include "Entity.h"
 
 GameManager* GameManager::m_instance = nullptr;
 
@@ -73,19 +74,20 @@ void GameManager::Run()
 		{
 			auto currentTime = clock::now();
 			std::chrono::duration<float> deltaTime = currentTime - m_lastTime;
+			m_deltaTime = deltaTime.count();
 			m_lastTime = currentTime;
 			if (m_timer > 0)
 			{
 				m_timer -= deltaTime.count();
-				fps += 1;
+				m_fps += 1;
 			}
 			else
 			{
-				WString fpsString = L"ENETRE | FPS:" + std::to_wstring((int)fps);
+				WString fpsString = L"ENETRE | FPS:" + std::to_wstring((int)m_fps);
 				// 3. Mettre à jour le titre de la fenêtre
 				SetWindowText(m_window->GHWND(), fpsString.c_str());
 				m_timer = 1;
-				fps = 0;
+				m_fps = 0;
 			}
 
 			m_renderEngine->Update(deltaTime.count());
@@ -98,19 +100,16 @@ void GameManager::Run()
 }
 
 
-Entity* GameManager::GetEntity(Id _entity)
+Entity* GameManager::GEntity(Id _entity)
 {
-	for (auto entite : m_entities)
-		if (entite->id == _entity)
-			return entite;
+	for (auto entity : m_entities)
+		if (entity.id == _entity)
+			return &entity;
 }
 
-Id* GameManager::AddEntity()
+void GameManager::AddEntity(Entity _entity)
 {
-	Entity* newEntity = new Entity();
-	newEntity->id.index = m_entities.size();
-	m_entities.push_back(newEntity);
-	return &newEntity->id;
+	m_entities.push_back(_entity);
 }
 
 void GameManager::Update()

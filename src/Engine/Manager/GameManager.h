@@ -12,27 +12,28 @@ class GameManager
 {
 public:
 	static GameManager* GetInstance();
-	float GetDeltaTime() {}
 	~GameManager();
 
 	void Run();
 
-	template<typename T>
-	T& AddComponent(Id _entity);
-
 	template<typename C>
-	C& GetComponent(Id _entity);
+	C& GComponent(Id _entity);
 
-	Entity* GetEntity(Id _entity);
+	Entity* GEntity(Id _entity);
 
-	Id* AddEntity();
+	void AddEntity(Entity _entity);
+
+	RenderEngine* GetRenderEngine() { return m_renderEngine; }
+	Window* GetWindow() { return m_window; }
+	float GetFPS() { return m_fps; }
+	float GetDeltaTime() { return m_deltaTime; }
 
 private:
 	using clock = std::chrono::steady_clock; // monotonic clock, no jumps
 	std::chrono::steady_clock::time_point m_lastTime;
 	float m_timer = 1;
-	float fps = 0;
-	float deltaTime = 0;
+	float m_fps = 0;
+	float m_deltaTime = 0;
 	Mesh* m_mesh = nullptr;
 	Matrix4x4f m_obj1;
 	Matrix4x4f m_obj2;
@@ -46,20 +47,11 @@ private:
 
 	SystemManager* m_systemManager;
 
-	std::vector<Entity*> m_entities;
+	Vector<Entity> m_entities;
 };
 
-template<typename T>
-inline T& GameManager::AddComponent(Id _entity)
-{
-	Entity* entity = GetEntity(_entity);
-	T* newComponent = new T();
-	entity->componants.push_back(newComponent);
-	return *newComponent;
-}
-
 template<typename C>
-inline C& GameManager::GetComponent(Id _entity)
+inline C& GameManager::GComponent(Id _entity)
 {
 
 }

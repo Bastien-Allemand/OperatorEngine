@@ -5,26 +5,6 @@
 #include "Manager/GameManager.h"
 #include "Entity.h"
 
-System::System()
-{
-}
-
-void System::AddEntity(UINT entity) {
-  //  if (entity >= m_entities.size()) {
-  //      m_entities.resize(entity + 1);
-		//m_entities[entity] = entity;
-  //  }
-}
-
-Entity* System::GetEntity(Id id)
-{
-    //for (Entity* entity : m_entities)
-    //{
-    //    if (entity->id == id) return entity;
-    //}
-    return nullptr;
-}
-
 void TransformSystem::Update()
 {
     //for (Entity* entity : m_entities)

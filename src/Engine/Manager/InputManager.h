@@ -1,6 +1,4 @@
 #pragma once
-#include "../Core/Define.h"
-#include <unordered_map>
 
 class InputManager
 {

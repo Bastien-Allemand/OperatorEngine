@@ -1,16 +1,25 @@
 #include "pch.h"
 #include "SystemManager.h"
 #include "System.h"
+#include "Entity.h"
+#include "Component.h"
+#include "System/MeshSystem.h"
 
-bool SystemManager::AddSystem(System* _system)
+void SystemManager::FilterEntity(Entity* _entity)
 {
-	m_systems.push_back(_system);
-	return true;
+	for (Component* component : _entity->componants)
+	{
+		switch (component->type)
+		{
+			case Component::ComponentType::Mesh:
+				m_meshSystem->AddEntity(_entity);
+				break;
+		default:
+			break;
+		}
+	}
 }
 void SystemManager::Update()
 {
-	for (auto& system : m_systems)
-	{
-		system->Update();
-	}
+
 }

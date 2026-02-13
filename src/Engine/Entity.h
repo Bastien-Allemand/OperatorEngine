@@ -19,6 +19,7 @@ class Entity
 {
 public:
 	Id id;
+
 	std::vector<Component*> componants;
 
 };
