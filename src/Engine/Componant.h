@@ -47,8 +47,11 @@ struct BoxCollider : public Componant
 public:
 	bool IsColliding = false;
 
-	Vector3f min = { 0.0f, 0.0f, 0.0f };;
-	Vector3f max = { 0.0f, 0.0f, 0.0f };;
+	Vector3f center = { 0.0f, 0.0f, 0.0f };
+	Vector3f size = { 1.0f, 1.0f, 1.0f };
+
+	Vector3f min = { 0.0f, 0.0f, 0.0f };
+	Vector3f max = { 0.0f, 0.0f, 0.0f };
 
 };
 

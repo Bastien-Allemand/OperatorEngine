@@ -119,8 +119,28 @@ void CollisionSystem::Update(float deltaTime)
    for (Entity* e : m_entitiesss)
    {
 	   BoxCollider* collider = &m_gameManager->GetComponant<BoxCollider>(e);
-	   collider->IsColliding = false;
+       TransformComponant& transform = m_gameManager->GetComponant<TransformComponant>(e);
+
+       //Vector3f halfSize;
+
+       //halfSize.x = (collider->size.x * transform.worldTransform.scale.x) * collider->size.x;
+       //halfSize.y = (collider->size.y * transform.worldTransform.scale.y) * collider->size.y;
+       //halfSize.z = (collider->size.z * transform.worldTransform.scale.z) * collider->size.z;
+
+       collider->center = transform.worldTransform.position;
+
+	   collider->min.x = collider->center.x - collider->size.x;
+	   collider->min.y = collider->center.y - collider->size.y;
+	   collider->min.z = collider->center.z - collider->size.z;
+
+	   collider->max.x = collider->center.x + collider->size.x;
+	   collider->max.y = collider->center.y + collider->size.y;
+	   collider->max.z = collider->center.z + collider->size.z;
+
+       collider->IsColliding = false;
        colliders.push_back(collider);
+
+
    }
     for (int i = 0; i < colliders.size(); ++i)
     {
