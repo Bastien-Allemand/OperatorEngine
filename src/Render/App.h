@@ -2,6 +2,7 @@
 class Window;
 class RenderEngine;
 class Mesh;
+class Font;
 #include <chrono>
 class App
 {
@@ -18,9 +19,12 @@ private:
 	static LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
 	Window* m_window = nullptr;
 	Mesh* m_mesh = nullptr;
+	Font* m_font = nullptr;
 	RenderEngine* m_renderEngine = nullptr;
 	Matrix4x4f m_obj1;
 	Matrix4x4f m_obj2;
+	Matrix4x4f m_obj3;
+
 	bool test = false;
 };
 

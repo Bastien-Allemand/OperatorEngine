@@ -19,7 +19,7 @@ struct charDefinition
 class Font
 {
 public:
-	Font() = default;
+	Font(WString _texturePath, WString _dataPath);
 	~Font();
 
 	bool Init(ID3D12Device* _device, ID3D12GraphicsCommandList* _cmdList, WString _texturePath, int32 _rows, int32 _cols);
@@ -38,7 +38,7 @@ public:
 	ID3D12Resource* GTexture() { return m_texture; }
 	const UnOrderedMap<int, charDefinition>& GAlphabet() const { return m_alphabet; }
 
-	bool Load(Font& _font, WString _texturePath, WString _dataPath);
+	bool Load(WString _texturePath, WString _dataPath);
 
 private:
 	void UploadVertex(ID3D12Device* _rd, ID3D12GraphicsCommandList* _list);

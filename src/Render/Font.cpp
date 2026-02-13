@@ -6,6 +6,11 @@
 #include "d3dx12.h"
 #include <fstream>
 
+Font::Font(WString _texturePath, WString _dataPath)
+{
+	Load(_texturePath, _dataPath);
+}
+
 Font::~Font()
 {
 	if (m_texture) m_texture->Release();
@@ -249,7 +254,7 @@ ID3D12Resource* Font::CreateDefaultBuffer(ID3D12Device* _rd, ID3D12GraphicsComma
 	return defaultBuffer;
 }
 
-bool Font::Load(Font& _font, WString _texturePath, WString _dataPath)
+bool Font::Load(WString _texturePath, WString _dataPath)
 {
 	std::wifstream file(_dataPath);
 	if (!file.is_open())
@@ -274,7 +279,7 @@ bool Font::Load(Font& _font, WString _texturePath, WString _dataPath)
 				float v = (float)y / texHeight;
 				float wUV = (float)width / texWidth;
 				float hUV = (float)height / texHeight;
-				_font.AddCharacter(id, u, v, wUV, hUV, xadvance);
+				AddCharacter(id, u, v, wUV, hUV, xadvance);
 			}
 		}
 		else if (line.substr(0, 7) == L"common ")

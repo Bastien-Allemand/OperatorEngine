@@ -5,6 +5,7 @@
 #include <conio.h>
 #include "Geometry.h"
 #include "Mesh.h"
+#include "Font.h"
 
 LRESULT CALLBACK App::WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
@@ -61,6 +62,8 @@ void App::Initialize(int _width,int _height)
 
 	DirectX::XMStoreFloat4x4(&m_obj2, world);
 
+	m_font = new Font(L"../../res/Render/arial.dds", L"../../res/Render/arial.fnt");
+	m_renderEngine->InitFont(m_font);
 }
 
 App::~App()
@@ -106,6 +109,8 @@ void App::Run()
 			m_renderEngine->BeginDraw();
 			m_renderEngine->Draw(m_mesh,DirectX::XMLoadFloat4x4(&m_obj1));
 			m_renderEngine->Draw(m_mesh,DirectX::XMLoadFloat4x4(&m_obj2));
+			m_renderEngine->DrawChar(m_font,'e', DirectX::XMLoadFloat4x4(&m_obj2));
+
 			m_renderEngine->CloseDraw();
 		}
 	}

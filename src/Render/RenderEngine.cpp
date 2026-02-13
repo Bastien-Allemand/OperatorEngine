@@ -98,6 +98,15 @@ void RenderEngine::InitMesh(Mesh* _mesh)
 	m_commandContext->CloseAndExecute(m_queue);
 }
 
+void RenderEngine::InitFont(Font* _font)
+{
+	m_commandContext->GCommandAllocator()->Reset();
+	m_commandContext->GCommandList()->Reset(m_commandContext->GCommandAllocator(), nullptr);
+	_font->Upload(m_renderDevice->GDevice(), m_commandContext->GCommandList());
+
+	m_commandContext->CloseAndExecute(m_queue);
+}
+
 void RenderEngine::BeginDraw()
 {
 	auto list = m_commandContext->GCommandList();
@@ -125,6 +134,8 @@ void RenderEngine::BeginDraw()
 	list->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
 	list->SetGraphicsRootConstantBufferView(0, m_sceneCB->GetAddress());
+	list->SetGraphicsRootConstantBufferView(1, m_lightCB->GetAddress());
+
 	/*list->SetGraphicsRootConstantBufferView(1, m_lightCB->GetAddress());	
 
 	for (int i = 0; i < m_meshes.size(); i++)
@@ -138,7 +149,6 @@ void RenderEngine::BeginDraw()
 	DrawString("He rg  er?./�%���", 50.0f, 50.0f, 70.0f);
 
 	barrier = CD3DX12_RESOURCE_BARRIER::Transition(m_renderTarget->GCurrentBackBuffer(),*/
-	list->SetGraphicsRootConstantBufferView(1, m_lightCB->GetAddress());
 }
 
 void RenderEngine::CloseDraw()
@@ -160,6 +170,7 @@ void RenderEngine::CloseDraw()
 
 	FlushCommandQueue();
 	m_instanceCbIndex = 0;
+	m_fontCBIndex = 0;
 }
 
 void RenderEngine::Draw(Mesh* _mesh,Matrix _matrix)
@@ -364,7 +375,7 @@ bool RenderEngine::InitFont()
 	m_commandContext->GCommandAllocator()->Reset();
 	m_commandContext->GCommandList()->Reset(m_commandContext->GCommandAllocator(), nullptr);
 
-	m_font = new Font();
+	m_font = new Font(L"../../res/Render/arial.dds", L"../../res/Render/arial.fnt");
 	if (!m_font->Init(m_renderDevice->GDevice(), m_commandContext->GCommandList(),
 		L"../../res/Render/arial.dds", 8, 16))
 	{
@@ -372,7 +383,7 @@ bool RenderEngine::InitFont()
 		return 1;
 	}
 	
-	m_font->Load(*m_font, L"../../res/Render/arial.dds", L"../../res/Render/arial.fnt");
+	/*m_font->Load(*m_font, L"../../res/Render/arial.dds", L"../../res/Render/arial.fnt");*/
 
 	m_commandContext->CloseAndExecute(m_queue);
 	FlushCommandQueue();
@@ -457,4 +468,29 @@ void RenderEngine::DrawString(String _text, float32 _x, float32 _y, float32 _siz
 			cursorX += def.advanceX * _size / 32;
 		}
 	}
+}
+
+void RenderEngine::DrawChar(Font* _font, char _char, Matrix _matrix)
+{
+	FontConstantBuffer cb;
+
+	Matrix ortho = DirectX::XMMatrixOrthographicOffCenterLH(
+		0.0f, m_swapChain->GViewport()->Width,
+		m_swapChain->GViewport()->Height, 0.0f,
+		0.0f, 1.0f);
+
+	Matrix worldViewProj = ortho;
+	if (m_fontCBIndex >= m_fontCB.size())
+	{
+		m_fontCB.push_back(new ConstantBuffer<FontConstantBuffer>());
+		bool r = m_fontCB.back()->Init(m_renderDevice->GDevice(), m_desc->GcbvHeap(), 2 + m_fontCBIndex);
+		Log(r, "Initializing new Font Constant Buffer");
+	}
+	m_fontCB[m_fontCBIndex]->CopyData(0, cb);
+	auto list = m_commandContext->GCommandList();
+
+	list->SetGraphicsRootConstantBufferView(0, m_instanceCB[m_instanceCbIndex]->GetAddress());
+	_font->Bind(list);
+	list->DrawIndexedInstanced(_font->GIndexCount(), 1, 0, 0, 0);
+	m_instanceCbIndex++;
 }

@@ -47,9 +47,11 @@ public:
 	bool Init(int _width, int _height, HWND _handle);
 	void Update(float dt);
 	void InitMesh(Mesh* _mesh);
+	void InitFont(Font* _font);
 	void BeginDraw();
 	void CloseDraw();
 	void Draw(Mesh* _mesh, Matrix _matrix);
+	void DrawChar(Font* _font, char _char, Matrix _matrix);
 	bool Resize(int _width, int _height);
 	bool m4xMsaaState = 0;
 	uint32 m4xMsaaQuality = 0;
@@ -95,6 +97,6 @@ private:
 	void HardInit();
 	bool InitQueue();
 	bool InitFont();
-	void DrawString(String _text, float32 _x, float32 _y, float32 _size);
+	void DrawString(String _text, float32 _x, float32 _y, float32 _size);	
 };
 
