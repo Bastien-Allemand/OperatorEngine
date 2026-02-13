@@ -23,8 +23,9 @@ LRESULT CALLBACK App::WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 
 void App::Initialize(int _width,int _height)
 {
+	bool r;
 	#if defined(DEBUG) | defined(_DEBUG)
-		bool r = AllocConsole();
+		r = AllocConsole();
 		FILE* pfile = nullptr;
 		freopen_s(&pfile, "CONOUT$", "w", stdout);
 		freopen_s(&pfile, "CONOUT$", "w", stderr);
@@ -36,6 +37,7 @@ void App::Initialize(int _width,int _height)
 		Log(!r && !r2, "Console Initializing");
 
 	#endif
+
 	m_window = new Window;
 	r = m_window->Init(_width, _height, L"ENETRE", WndProc);
 	Log(r, "Initializing Window");
@@ -44,6 +46,21 @@ void App::Initialize(int _width,int _height)
 	Log(r,"Initializing RenderEngine");
 	
 	m_lastTime = clock::now();
+
+	Geometry geo;
+	geo.BuildBox();
+	m_mesh = new Mesh(geo);
+	m_renderEngine->InitMesh(m_mesh);
+	Matrix world = DirectX::XMMatrixIdentity();
+	//Vector3f pos = { 0,0,4 };
+	//world = world * DirectX::XMMatrixTranslationFromVector(DirectX::XMLoadFloat3(&pos));
+	DirectX::XMStoreFloat4x4(&m_obj1, world);
+	Vector3f pos2 = { 2,0,0 };
+	world = DirectX::XMMatrixIdentity();
+	world = world * DirectX::XMMatrixTranslationFromVector(DirectX::XMLoadFloat3(&pos2));
+
+	DirectX::XMStoreFloat4x4(&m_obj2, world);
+
 }
 
 App::~App()
@@ -83,18 +100,13 @@ void App::Run()
 				SetWindowText(m_window->GHWND(), fpsString.c_str());
 				m_timer = 1;
 				fps = 0;
-				if (!test)
-				{
-					Geometry geo;
-					geo.BuildBox();
-					m_mesh = new Mesh(geo);
-					m_renderEngine->AddMeshToDraw(m_mesh); Log(false, "Adding Box Mesh to Draw List");
-					test = true;
-				}
 			}
 
 			m_renderEngine->Update(deltaTime.count());
-			m_renderEngine->Draw();
+			m_renderEngine->BeginDraw();
+			m_renderEngine->Draw(m_mesh,DirectX::XMLoadFloat4x4(&m_obj1));
+			m_renderEngine->Draw(m_mesh,DirectX::XMLoadFloat4x4(&m_obj2));
+			m_renderEngine->CloseDraw();
 		}
 	}
 }
