@@ -6,6 +6,7 @@ public:
 	PipelineStateObject() = default;
 	bool Init(ID3D12Device* _device);
 	ID3D12PipelineState* GPipelineState() { return m_pipelineState; }
+	ID3D12RootSignature* GRootSig() { return m_rootSig; }
 private:
 	ID3D12PipelineState* m_pipelineState = nullptr;
 

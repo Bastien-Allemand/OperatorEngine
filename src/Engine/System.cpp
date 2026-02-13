@@ -1,5 +1,7 @@
 #include "pch.h"
 #include "System.h"
+#include "InputManager.h"
+#include "Componant.h"
 
 System::System()
 {
@@ -29,7 +31,7 @@ void TransformSystem::Update(float deltaTime)
         TransformComponant& transform = m_gameManager->GetComponant<TransformComponant>(entity);
 
 
-        transform.position.x += 0.1f * deltaTime; // Exemple de déplacement
+        transform.position.x += 0.1f * deltaTime; // Exemple de dï¿½placement
         XVector pos = XMLoadFloat3(&transform.worldtransform.position);
         XVector rot = XMLoadFloat4(&transform.worldtransform.quaternion);
         XVector scale = XMLoadFloat3(&transform.worldtransform.scale);
@@ -70,7 +72,7 @@ void TransformSystem::Move()
         Transform& transform = m_gameManager->GetComponant<Transform>(entity);
         //if (transform.m_children.size() > 0) {
         //    for (Transform* child : transform.m_children) {
-        //        child->position.x += 10.1f; // Exemple de déplacement pour les enfants
+        //        child->position.x += 10.1f; // Exemple de dï¿½placement pour les enfants
         //    }
         //}
 
@@ -80,10 +82,34 @@ void TransformSystem::Move()
                 Transform& transformChild = m_gameManager->GetComponant<Transform>(child); transformChild.position.x += 10.1f;
             }
         }
-        transform.position.x += 10.1f; // Exemple de déplacement
+        transform.position.x += 10.1f; // Exemple de dï¿½placement
 
     }
+}
 
+void InputSystem::Update(float deltaTime)
+{
+    InputManager* im = InputManager::GetInstance();
+    im->Update();
+
+    for (Entity* entity : m_entitiesss)
+    {
+        try
+        {
+            InputComponent& inputComp = m_gameManager->GetComponant<InputComponent>(entity);
+            if (inputComp.id != id) continue;
+            for (auto& [name, action] : inputComp.actions)
+            {
+                bool currentlyDown = im->IsKeyDown(action.keyCode);
+                bool justPressed = im->IsKeyPressed(action.keyCode);
+
+                action.isPressed = currentlyDown;
+                action.isJustPressed = justPressed;
+                action.value = currentlyDown ? 1.0f : 0.0f;
+            }
+        }
+        catch (const std::exception&) { continue; }
+    }
 }
 
 void CollisionSystem::Update(float deltaTime)

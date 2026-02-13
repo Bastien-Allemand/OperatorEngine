@@ -4,8 +4,7 @@ struct vertex
 {
 	Vector3f pos;
 	Vector3f normal;
-	Vector2f uv;
-
+	Vector2f tex;
 };
 
 class Geometry
@@ -14,9 +13,9 @@ class Geometry
 	Geometry() = default;
 	~Geometry() = default;
 	Vector<vertex> vertices;
-	Vector<unsigned int> indices;
+	Vector<uint32> indices;
 
-	void BuildQuad();
+	void BuildBox();
 	void BuildVertexBuffer();
 };
 

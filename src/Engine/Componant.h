@@ -1,5 +1,7 @@
 #pragma once
-
+#include <string>
+#include <unordered_map>
+#include <iostream>
 
 struct Componant
 {
@@ -70,3 +72,18 @@ public:
 
 };
 
+struct InputAction
+{
+    int keyCode;
+    bool isPressed = false;    
+    bool isJustPressed = false; 
+    float value = 0.0f;
+};
+
+struct InputComponent : public Componant
+{
+    std::unordered_map<std::string, InputAction> actions;
+	void BindAction(const std::string& _actionName, int key);
+	bool IsActionPressed(const std::string& _actionName);
+	bool IsActionJustPressed(const std::string& _actionName);
+};
