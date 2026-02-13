@@ -76,16 +76,24 @@ void RenderEngine::Update(float dt)
 	world = world * DirectX::XMMatrixRotationX(dt);
 	DirectX::XMStoreFloat4x4(&m_world, world);
 	DirectX::XMMATRIX proj = DirectX::XMLoadFloat4x4(&m_proj);
-	SceneConstantBuffer cb;
+	ConstantBufferPass cb;
 	DirectX::XMMATRIX viewProj = view * proj;
 	DirectX::XMStoreFloat4x4(&cb.gViewProj, DirectX::XMMatrixTranspose(viewProj));
 	DirectX::XMStoreFloat4x4(&cb.gWorld, DirectX::XMMatrixTranspose(world));
 
 	m_sceneCB->CopyData(0, cb);
-
 }
 
-void RenderEngine::Draw()
+void RenderEngine::InitMesh(Mesh* _mesh)
+{
+	m_commandContext->GCommandAllocator()->Reset();
+	m_commandContext->GCommandList()->Reset(m_commandContext->GCommandAllocator(), nullptr);
+	_mesh->Upload(m_renderDevice->GDevice(), m_commandContext->GCommandList());
+
+	m_commandContext->CloseAndExecute(m_queue);
+}
+
+void RenderEngine::BeginDraw()
 {
 	auto list = m_commandContext->GCommandList();
 	m_commandContext->GCommandAllocator()->Reset();
@@ -115,18 +123,13 @@ void RenderEngine::Draw()
 
 	list->SetGraphicsRootConstantBufferView(0, m_sceneCB->GetAddress());
 	list->SetGraphicsRootConstantBufferView(1, m_lightCB->GetAddress());
+}
 
-	for (int i = 0; i < m_meshes.size(); i++)
-	{
-		m_meshes[i]->Upload(m_renderDevice->GDevice(), list);
-		m_meshes[i]->Bind(list);
-		list->DrawIndexedInstanced(m_meshes[i]->GetIndexCount(), 1, 0, 0, 0);
-		i++;
-	}
-
-	barrier = CD3DX12_RESOURCE_BARRIER::Transition(m_renderTarget->GCurrentBackBuffer(),
+void RenderEngine::CloseDraw()
+{
+	auto barrier = CD3DX12_RESOURCE_BARRIER::Transition(m_renderTarget->GCurrentBackBuffer(),
 		D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT);
-	list->ResourceBarrier(1, &barrier);
+	m_commandContext->GCommandList()->ResourceBarrier(1, &barrier);
 
 	m_commandContext->CloseAndExecute(m_queue);
 
@@ -140,6 +143,32 @@ void RenderEngine::Draw()
 	m_renderTarget->SwapBuffers();
 
 	FlushCommandQueue();
+	m_instanceCbIndex = 0;
+}
+
+void RenderEngine::Draw(Mesh* _mesh,Matrix _matrix)
+{
+	ConstantBufferPass cb;
+	Matrix view = DirectX::XMLoadFloat4x4(&m_view);
+	Matrix proj = DirectX::XMLoadFloat4x4(&m_proj);
+	Matrix world = DirectX::XMLoadFloat4x4(&m_world);
+	_matrix = world * _matrix;
+	DirectX::XMMATRIX viewProj = view * proj;
+	DirectX::XMStoreFloat4x4(&cb.gWorld, DirectX::XMMatrixTranspose(_matrix));
+	DirectX::XMStoreFloat4x4(&cb.gViewProj, DirectX::XMMatrixTranspose(viewProj));
+	if (m_instanceCB.size() <= m_instanceCbIndex)
+	{
+		m_instanceCB.push_back(new ConstantBuffer<ConstantBufferPass>());
+		bool r = m_instanceCB[m_instanceCbIndex]->Init(m_renderDevice->GDevice(), m_desc->GcbvHeap(), 2 + m_instanceCbIndex);
+		Log(r, "Initializing new Instance Constant Buffer");
+	}
+	m_instanceCB[m_instanceCbIndex]->CopyData(0, cb);
+	auto list = m_commandContext->GCommandList();
+
+	list->SetGraphicsRootConstantBufferView(0, m_instanceCB[m_instanceCbIndex]->GetAddress());
+	_mesh->Bind(list);
+	list->DrawIndexedInstanced(_mesh->GetIndexCount(), 1, 0, 0, 0);
+	m_instanceCbIndex++;
 }
 
 bool RenderEngine::Resize(int _width, int _height)
@@ -239,11 +268,6 @@ bool RenderEngine::Resize(int _width, int _height)
 	return 0;
 }
 
-void RenderEngine::AddMeshToDraw(Mesh* _mesh)
-{
-	m_meshes.push_back(_mesh);
-}
-
 bool RenderEngine::FlushCommandQueue()
 {
 	m_fence->SFenceValue(m_fence->GCFenceValue() + 1);
@@ -276,7 +300,7 @@ void RenderEngine::HardInit()
 	m_fence = new Fence();
 	m_desc = new Descriptors();
 	m_renderTarget = new RenderTarget();
-	m_sceneCB = new ConstantBuffer<SceneConstantBuffer>();
+	m_sceneCB = new ConstantBuffer<ConstantBufferPass>();
 	m_lightCB = new ConstantBuffer<LightData>();
 	DirectX::XMMATRIX world = DirectX::XMMatrixIdentity();
 	DirectX::XMStoreFloat4x4(&m_world, world);
@@ -289,7 +313,7 @@ void RenderEngine::HardInit()
 	passData.Direction = { 0.577f, -0.577f, 0.577f };
 	LightData data;
 	data.DirLight = passData;
-	data.EyePosW = { 0, 0, -5 };
+	data.EyePosW = { 0, 0, 0 };
 
 	m_lightData = data;
 }

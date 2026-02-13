@@ -37,22 +37,6 @@ using Matrix4x4f = DirectX::XMFLOAT4X4;
 using Matrix = DirectX::XMMATRIX;
 using XVector = DirectX::XMVECTOR;
 
-inline Vector3f CPU_VEC3_RIGHT = { 1.0f, 0.0f, 0.0f };
-inline Vector3f CPU_VEC3_UP = { 0.0f, 1.0f, 0.0f };
-inline Vector3f CPU_VEC3_DIR = { 0.0f, 0.0f, 1.0f };
-inline Vector3f CPU_VEC3_ZERO = { 0.0f, 0.0f, 0.0f };
-
-
-
-inline Vector3f OPE_VEC3_RIGHT = { 1.0f, 0.0f, 0.0f };
-inline Vector3f OPE_VEC3_UP = { 0.0f, 1.0f, 0.0f };
-inline Vector3f OPE_VEC3_DIR = { 0.0f, 0.0f, 1.0f };
-inline Vector3f OPE_VEC3_ZERO = { 0.0f, 0.0f, 0.0f };
-inline Vector3f OPE_VEC3_ONE = { 1.0f, 1.0f, 1.0f };
-
-
-inline Quaternion OPE_QUAT_ZERO = { 0.0f, 0.0f, 0.0f, 1.0f };
-
 using String = std::string;
 using WString = std::wstring;
 
@@ -61,6 +45,13 @@ using Vector = std::vector<T>;
 
 template<typename Key, typename Value>
 using UnOrderedMap = std::unordered_map<Key, Value>;
+
+inline Vector3f VEC3_RIGHT = { 1.0f, 0.0f, 0.0f };
+inline Vector3f VEC3_UP = { 0.0f, 1.0f, 0.0f };
+inline Vector3f VEC3_DIR = { 0.0f, 0.0f, 1.0f };
+inline Vector3f VEC3_ZERO = { 0.0f, 0.0f, 0.0f };
+inline Vector3f VEC3_ONE = { 1.0f, 1.0f, 1.0f };
+inline Quaternion QUAT_ZERO = { 0.0f, 0.0f, 0.0f, 0.0f };
 
 enum class DebugFlag {
     LOG,  
