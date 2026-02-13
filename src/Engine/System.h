@@ -1,7 +1,5 @@
 #pragma once
-#include <vector>
-#include <DirectXMath.h>
-#include "GameManager.h"
+#include "Manager/GameManager.h"
 
 class GameManager;
 class Entity;
@@ -18,10 +16,9 @@ public:
 
     UINT id;
 
-	std::vector<Entity*> m_entitiesss; // Liste des entités que ce système gère
+	Vector<Entity*> m_entities; // Liste des entités que ce système gère
 protected:
-    GameManager* m_gameManager;
-    std::vector<UINT> m_entities;
+    Vector<UINT> m_entities;
 };
 
 class TransformSystem : public System

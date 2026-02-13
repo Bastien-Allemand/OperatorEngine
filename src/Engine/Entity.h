@@ -1,21 +1,24 @@
 #pragma once
-#include <iostream>
-#include <vector>
-#include "Componant.h"
+class Component;
 
+struct Id
+{
+	uint64 index;
+	uint32 componentCount;
 
+	bool operator==(const Id& other) const 
+	{
+		if (index == other.index && componentCount == other.componentCount)
+			return true;
 
-#define INDEX UINT
-#define NUMBER_OF_COMPONENTS int
+		return false;
+	}
+};
+
 class Entity
 {
 public:
-	std::pair<INDEX, NUMBER_OF_COMPONENTS> id;
-	INDEX ids;
+	Id id;
+	std::vector<Component*> componants;
 
-	std::vector<Componant*> m_componants;
-	std::vector<Entity*> m_children;
-	Entity* m_parent;
-	void AddComponant(Componant* componant);
-	void AddChild(Entity* child);
 };

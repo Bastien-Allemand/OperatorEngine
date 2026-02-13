@@ -1,6 +1,6 @@
 #include "pch.h"
 #include "System.h"
-#include "InputManager.h"
+#include "Manager/InputManager.h"
 #include "Componant.h"
 
 System::System()

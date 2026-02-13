@@ -1,5 +1,5 @@
 #include "pch.h"
-#include "Componant.h"
+#include "Component.h"
 
 
 void InputComponent::BindAction(const std::string& _actionName, int key)
