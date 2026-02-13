@@ -86,3 +86,50 @@ void TransformSystem::Move()
 
 }
 
+void CollisionSystem::Update(float deltaTime)
+{
+   std::vector<BoxCollider*> colliders;
+   for (Entity* e : m_entitiesss) colliders.push_back(&m_gameManager->GetComponant<BoxCollider>(e));
+    for (int i = 0; i < colliders.size(); ++i)
+    {
+        BoxCollider* collider1 = colliders[i];
+        if (collider1->IsColliding) continue;
+        for (int j = i + 1; j < colliders.size(); ++j)
+        {
+            BoxCollider* collider2 = colliders[j];
+            if (collider2->IsColliding || collider1 == collider2) continue;
+            if (collider1->min.x <= collider2->max.x && collider1->max.x >= collider2-> min.x &&
+                collider1->min.y <= collider2->max.y && collider1->max.y >= collider2-> min.y &&
+                collider1->min.z <= collider2->max.z && collider1->max.z >= collider2-> min.z)
+            {
+                collider1->IsColliding = true;
+                collider2->IsColliding = true;
+            }
+        }
+	}
+
+
+    /*for (Entity* entity1 : m_entitiesss)
+    {
+		BoxCollider& collider1 = m_gameManager->GetComponant<BoxCollider>(entity1);
+
+        if (collider1.IsColliding) continue;
+        for (Entity* entity2 : m_entitiesss)
+        {
+            BoxCollider& collider2 = m_gameManager->GetComponant<BoxCollider>(entity2);
+			if (entity1 == entity2 || collider2.IsColliding) continue;
+
+            if (collider1.min.x <= collider2.max.x && collider1.max.x >= collider2.min.x &&
+                collider1.min.y <= collider2.max.y && collider1.max.y >= collider2.min.y &&
+				collider1.min.z <= collider2.max.z && collider1.max.z >= collider2.min.z)
+            {
+                collider1.IsColliding = true;
+                collider2.IsColliding = true;
+			}
+        }
+    }*/
+}
+
+void InputSystem::Update(float deltaTime)
+{
+}

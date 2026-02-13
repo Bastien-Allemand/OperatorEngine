@@ -29,8 +29,8 @@ class TransformSystem : public System
 public:
     TransformSystem() = default;
     void Update(float deltaTime) override;
-	void AddChildren(Transform& child);
-	void AddParent(Transform& Parent);
+	//void AddChildren(Transform& child);
+	//void AddParent(Transform& Parent);
 
     void Move();
 };
@@ -39,5 +39,12 @@ class InputSystem : public System
 {
 public:
     InputSystem() = default;
+	void Update(float deltaTime) override;
+};
+
+class CollisionSystem : public System
+{
+public:
+    CollisionSystem() = default;
 	void Update(float deltaTime) override;
 };

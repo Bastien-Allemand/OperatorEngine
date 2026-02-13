@@ -59,3 +59,14 @@ public:
 	Matrix4x4f world;
 };
 
+
+struct BoxCollider : public Componant
+{
+public:
+	bool IsColliding = false;
+
+	Vector3f min;
+	Vector3f max;
+
+};
+
