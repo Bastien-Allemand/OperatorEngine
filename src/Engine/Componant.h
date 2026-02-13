@@ -1,40 +1,27 @@
 #pragma once
-#include <string>
-#include <unordered_map>
-#include <iostream>
+#include "Core/Transform.h"
 
 struct Componant
 {
 public:
-
-	UINT id;
-	virtual ~Componant() = default; // Indispensable !
+	uint64 id;
+	virtual ~Componant() = default;
 };
 
-struct Transform : public Componant
+struct TransformComponant : public Componant
 {
 public:
-	Vector3f position;
+	TransformComponant() = default;
 
-	Vector3f scale;
+	Transform worldTransform;
 
-	Vector3f direction;
-	Vector3f up;
-	Vector3f right;
-	Quaternion quaternion;
-	Matrix4x4f rot;
-
+	Transform localTransform;
 
 	bool wolrdNeedsUpdate;
 	bool invWolrdNeedsUpdate;
-private:
+
 	Matrix4x4f m_world;
-
 	Matrix4x4f m_invworld;
-
-public:
-	Matrix4x4f& GetWorld();
-	Matrix4x4f& GetInvWorld();
 };
 
 struct Velocity : public Componant
@@ -64,7 +51,7 @@ struct InputAction
 
 struct InputComponent : public Componant
 {
-    std::unordered_map<std::string, InputAction> actions;
+    std::unordered_map<String, InputAction> actions;
 	void BindAction(const std::string& _actionName, int key);
 	bool IsActionPressed(const std::string& _actionName);
 	bool IsActionJustPressed(const std::string& _actionName);

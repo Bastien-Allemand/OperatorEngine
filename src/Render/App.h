@@ -19,7 +19,8 @@ private:
 	Window* m_window = nullptr;
 	Mesh* m_mesh = nullptr;
 	RenderEngine* m_renderEngine = nullptr;
-
+	Matrix4x4f m_obj1;
+	Matrix4x4f m_obj2;
 	bool test = false;
 };
 

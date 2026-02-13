@@ -15,7 +15,7 @@ class PipelineStateObject2D;
 template<typename T>
 class ConstantBuffer;
 
-struct SceneConstantBuffer {
+struct ConstantBufferPass {
 	Matrix4x4f gWorld;
 	Matrix4x4f gViewProj;
 };
@@ -43,11 +43,14 @@ class RenderEngine
 public:
 	RenderEngine() = default;
 	~RenderEngine();
+
 	bool Init(int _width, int _height, HWND _handle);
 	void Update(float dt);
-	void Draw();
+	void InitMesh(Mesh* _mesh);
+	void BeginDraw();
+	void CloseDraw();
+	void Draw(Mesh* _mesh, Matrix _matrix);
 	bool Resize(int _width, int _height);
-	void AddMeshToDraw(Mesh* _mesh);
 	bool m4xMsaaState = 0;
 	uint32 m4xMsaaQuality = 0;
 
@@ -69,11 +72,14 @@ private:
 	// Heap SRV pour la texture de font
 	ID3D12DescriptorHeap* m_fontSrvHeap = nullptr;
 
-	ConstantBuffer<SceneConstantBuffer>* m_sceneCB = nullptr;
+	ConstantBuffer<ConstantBufferPass>* m_sceneCB = nullptr;
 	ConstantBuffer<LightData>* m_lightCB = nullptr;
 
 	Vector<ConstantBuffer <FontConstantBuffer>*> m_fontCB;
 	int m_fontCBIndex = 0;
+
+	Vector<ConstantBuffer<ConstantBufferPass>*> m_instanceCB;
+	int m_instanceCbIndex = 0;
 
 	Mesh* m_quadMesh = nullptr;
 
