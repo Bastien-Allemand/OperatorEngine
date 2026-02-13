@@ -1,25 +1,10 @@
 #include "pch.h"
 #include "App.h"
-#include "Window.h"
 #include "RenderEngine.h"
 #include <conio.h>
 #include "Geometry.h"
 #include "Mesh.h"
-
-LRESULT CALLBACK App::WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
-{
-	switch (msg)
-	{
-	case WM_DESTROY:
-	{
-		PostQuitMessage(0);
-		break;
-	}
-	default:
-		return DefWindowProc(hwnd, msg, wParam, lParam);
-	}
-	return 0;
-}
+#include "Core/Window.h"
 
 void App::Initialize(int _width,int _height)
 {
@@ -35,11 +20,9 @@ void App::Initialize(int _width,int _height)
 		dwMode |= ENABLE_VIRTUAL_TERMINAL_PROCESSING;
 		SetConsoleMode(hOut, dwMode);
 		Log(!r && !r2, "Console Initializing");
-
 	#endif
-
 	m_window = new Window;
-	r = m_window->Init(_width, _height, L"ENETRE", WndProc);
+	r = m_window->Init(_width, _height, L"ENETRE");
 	Log(r, "Initializing Window");
 	m_renderEngine = new RenderEngine();
 	r = m_renderEngine->Init(m_window->GCWidth(), m_window->GCHeight(), m_window->GHWND());

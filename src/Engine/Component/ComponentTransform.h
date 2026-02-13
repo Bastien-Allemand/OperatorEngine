@@ -1,7 +1,8 @@
 #pragma once
 class Transform;
+#include "Component.h"
 
-struct ComponentTransform
+struct ComponentTransform : public Component
 {
 public:
 	ComponentTransform() = default;
