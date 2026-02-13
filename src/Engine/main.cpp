@@ -24,16 +24,36 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR cmdLine, int cmdS
     TransformComponant& b = gameManager->AddComponant<TransformComponant>(entity5);
     TransformComponant& c = gameManager->AddComponant<TransformComponant>(entity6);
 
+
+	BoxCollider& box1 = gameManager->AddComponant<BoxCollider>(entity4);
+
+	box1.min = Vector3f(-2.0f, -1.0f, -1.0f);
+	box1.max = Vector3f(-1.0f, -2.0f, -1.0f);
+	BoxCollider& box2 = gameManager->AddComponant<BoxCollider>(entity5);
+	BoxCollider& box3 = gameManager->AddComponant<BoxCollider>(entity6);
+
+
     entity6->AddChild(entity4);
 
     TransformSystem& transformSystem = gameManager->AddSystem<TransformSystem>(entity4);
     TransformSystem& transformSystem2 = gameManager->AddSystem<TransformSystem>(entity5);
     TransformSystem& transformSystem3 = gameManager->AddSystem<TransformSystem>(entity6);
 
+	CollisionSystem& collisionSystem1 = gameManager->AddSystem<CollisionSystem>(entity4);
+	CollisionSystem& collisionSyste2 = gameManager->AddSystem<CollisionSystem>(entity5);
+	CollisionSystem& collisionSystem3 = gameManager->AddSystem<CollisionSystem>(entity6);
+
+
     gameManager->Update();
     TransformComponant& retrievedTransform1 = gameManager->GetComponant<TransformComponant>(entity4);
     TransformComponant& retrievedTransform2 = gameManager->GetComponant<TransformComponant>(entity5);
     TransformComponant& retrievedTransform3 = gameManager->GetComponant<TransformComponant>(entity6);
+   
+    BoxCollider& retrievedBoxCollider1 = gameManager->GetComponant<BoxCollider>(entity4);
+    BoxCollider& retrievedBoxCollider2 = gameManager->GetComponant<BoxCollider>(entity5);
+    BoxCollider& retrievedBoxCollider3 = gameManager->GetComponant<BoxCollider>(entity6);
+
+
 
 
 
@@ -46,6 +66,7 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR cmdLine, int cmdS
 
         std::cout << "Position X : " << retrievedTransform2.position.x << std::endl;
         std::cout << "Position X : " << retrievedTransform3.position.x << std::endl;
+		std::cout << retrievedBoxCollider1.IsColliding << std::endl;
 
 
     return 0;
