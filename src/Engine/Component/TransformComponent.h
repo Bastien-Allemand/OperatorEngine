@@ -1,20 +1,19 @@
 #pragma once
-class Transform;
-#include "Component.h"
+#include "Transform.h"
 
-struct TransformComponent : public Component
+struct TransformComponent
 {
 public:
-	TransformComponent()
-	{
-		type = ComponentType::Transform;
-	}
+	Transform worldTransform;
 
-	Transform* worldTransform;
-
-	Transform* localTransform;
+	Transform localTransform;
 
 	TransformComponent* parent = nullptr;
 	Vector<TransformComponent*> children;
+
+	void MoveTo(Vector3f _target,float _speed);
+private:
+	Vector3f m_targetPos;
+	float m_moveSpeed;
 };
 

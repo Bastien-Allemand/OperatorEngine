@@ -70,10 +70,6 @@ void RenderEngine::Update(float dt)
 
 	DirectX::XMStoreFloat4x4(&m_view, view);
 	DirectX::XMMATRIX world = DirectX::XMLoadFloat4x4(&m_world);
-
-	world = world * DirectX::XMMatrixRotationZ(dt);
-	world = world * DirectX::XMMatrixRotationY(dt);
-	world = world * DirectX::XMMatrixRotationX(dt);
 	DirectX::XMStoreFloat4x4(&m_world, world);
 	DirectX::XMMATRIX proj = DirectX::XMLoadFloat4x4(&m_proj);
 	ConstantBufferPass cb;

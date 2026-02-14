@@ -1,11 +1,11 @@
 #include "pch.h"
 #include "GameManager.h"
 #include "SystemManager.h"
+#include "ComponentManager.h"
+
 #include "Core/Window.h"
 #include "Render/RenderEngine.h"
-#include "Render/Geometry.h"
-#include "Render/Mesh.h"
-#include "Entity.h"
+
 
 GameManager* GameManager::m_instance = nullptr;
 
@@ -30,27 +30,14 @@ GameManager::GameManager()
 	Log(!r && !r2, "Console Initializing");
 #endif
 	m_window = new Window;
-	r = m_window->Init(1980, 1080, L"ENETRE");
+	r = m_window->Init(990, 540, L"ENETRE");
 	Log(r, "Initializing Window");
 	m_renderEngine = new RenderEngine();
 	r = m_renderEngine->Init(m_window->GCWidth(), m_window->GCHeight(), m_window->GHWND());
 	Log(r, "Initializing RenderEngine");
 
 	m_systemManager = new SystemManager();
-
-	Geometry geo;
-	geo.BuildBox();
-	m_mesh = new Mesh(geo);
-	m_renderEngine->InitMesh(m_mesh);
-	Matrix world = DirectX::XMMatrixIdentity();
-	//Vector3f pos = { 0,0,4 };
-	//world = world * DirectX::XMMatrixTranslationFromVector(DirectX::XMLoadFloat3(&pos));
-	DirectX::XMStoreFloat4x4(&m_obj1, world);
-	Vector3f pos2 = { 2,0,0 };
-	world = DirectX::XMMatrixIdentity();
-	world = world * DirectX::XMMatrixTranslationFromVector(DirectX::XMLoadFloat3(&pos2));
-
-	DirectX::XMStoreFloat4x4(&m_obj2, world);
+	m_componentManager = new ComponentManager();
 }
 GameManager::~GameManager()
 {
@@ -72,7 +59,7 @@ void GameManager::Run()
 		}
 		else
 		{
-			auto currentTime = clock::now();
+			auto currentTime = std::chrono::steady_clock::now();
 			std::chrono::duration<float> deltaTime = currentTime - m_lastTime;
 			m_deltaTime = deltaTime.count();
 			m_lastTime = currentTime;
@@ -91,28 +78,29 @@ void GameManager::Run()
 			}
 
 			m_renderEngine->Update(deltaTime.count());
-			m_renderEngine->BeginDraw();
-			m_renderEngine->Draw(m_mesh, DirectX::XMLoadFloat4x4(&m_obj1));
-			m_renderEngine->Draw(m_mesh, DirectX::XMLoadFloat4x4(&m_obj2));
-			m_renderEngine->CloseDraw();
+			m_systemManager->Update();
 		}
 	}
 }
 
-
-Entity* GameManager::GEntity(Id _entity)
+uint32 GameManager::GNewEntityId()
 {
-	for (auto entity : m_entities)
-		if (entity.id == _entity)
-			return &entity;
+	uint32 newId;
+	if (m_freeEntityIds.size() > 0)
+	{
+		newId = m_freeEntityIds[0];
+		m_freeEntityIds.erase(m_freeEntityIds.begin());
+		m_entityIds[newId] = newId;
+	}
+	newId = m_entityIds.size();
+	m_entityIds.push_back(newId);
+	return newId;
 }
 
-void GameManager::AddEntity(Entity _entity)
+void GameManager::DestroyEntity(uint32 _entityId)
 {
-	m_entities.push_back(_entity);
-}
+	m_entityIds[_entityId] = -1;
+	m_freeEntityIds.push_back(_entityId);
 
-void GameManager::Update()
-{
-	m_systemManager->Update();
+	m_componentManager->RemoveEntity(_entityId);
 }

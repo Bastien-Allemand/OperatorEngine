@@ -1,5 +1,4 @@
 #pragma once
-#include "Component.h"
 struct InputAction
 {
     int keyCode;
@@ -8,12 +7,9 @@ struct InputAction
     float value = 0.0f;
 };
 
-struct InputComponent : public Component
+struct InputComponent
 {
-    InputComponent()
-    {
-        type = ComponentType::Input;
-    }
+public:
     std::unordered_map<String, InputAction> actions;
     void BindAction(const std::string& _actionName, int key);
     bool IsActionPressed(const std::string& _actionName);

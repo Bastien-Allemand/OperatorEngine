@@ -17,15 +17,15 @@ public:
 	void SetPosition(float x, float y, float z);
 	void SetScale(float x, float y, float z);
 
-	Vector3f position;
+	Vector3f position = {0,0,0};
 
-	Vector3f scale;
+	Vector3f scale = {1,1,1};
 
-	Vector3f up;
-	Vector3f right;
-	Vector3f forward;
-	Vector4f quaternion;
+	Vector3f up = VEC3_UP;
+	Vector3f right = VEC3_RIGHT;
+	Vector3f forward = VEC3_FOWARD;
+	Vector4f quaternion = QUAT_ZERO;
 
-	Matrix4x4f rotmatrix;
+	Matrix4x4f rotmatrix = MATRIX_IDENTITY;
 };
 

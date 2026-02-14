@@ -1,40 +1,33 @@
 #include "pch.h"
 #include "MeshSystem.h"
-#include "Entity.h"
-#include "Component/MeshComponent.h"
+
 #include "Manager/GameManager.h"
 #include "Render/RenderEngine.h"
-#include "Component/TransformComponent.h"
 
-void MeshSystem::AddEntity(Entity* entity)
-{
-	m_entities.push_back(entity);
-}
+#include "Component/TransformComponent.h"
+#include "Component/MeshComponent.h"
+#include "Manager/ComponentManager.h"
+#include "ComponentPool.h"
+#include "Transform.h"
 
 void MeshSystem::Update()
 {
-	MeshComponent* meshComponent = nullptr;
-	TransformComponent* transformComponent = nullptr;
-	for (auto entites : m_entities)
+	GameManager* gameManager = GameManager::GetInstance();
+	RenderEngine* renderEngine = gameManager->GRenderEngine();
+	ComponentPool<MeshComponent>* MeshPool = gameManager->GComponentManager()->GPool<MeshComponent>();
+	ComponentPool<TransformComponent>* transformPool = gameManager->GComponentManager()->GPool<TransformComponent>();
+	Vector<uint32>EntityWithMesh = MeshPool->GEntityIds();
+	renderEngine->BeginDraw();
+	for (uint32 entityId : EntityWithMesh)
 	{
-		for (auto component : entites->componants )
-		{
-			meshComponent = static_cast<MeshComponent*>(component);
-			if (meshComponent != nullptr)
-			{
-				if (!meshComponent->initialized)
-				{
-					GameManager::GetInstance()->GetRenderEngine()->InitMesh(meshComponent->mesh);
-				}
-				m_meshComponents[entites] = meshComponent;
-				continue;
-			}
-			transformComponent = static_cast<TransformComponent*>(component);
-			if (transformComponent != nullptr)
-			{
-				m_TransformComponents[entites] = transformComponent;
-				continue;
-			}
-		}
+		TransformComponent*  transformComponent = transformPool->GComponent(entityId);
+		if (transformComponent == nullptr)	continue;
+		MeshComponent* meshComponent = MeshPool->GComponent(entityId);
+		if (!meshComponent->visible) continue;
+		if (!meshComponent->initialized) continue;
+		Matrix4x4f transform = transformComponent->worldTransform.BuildMatrix();
+		renderEngine->Draw(meshComponent->mesh,DirectX::XMLoadFloat4x4(&transform));
 	}
+	renderEngine->CloseDraw();
+
 }

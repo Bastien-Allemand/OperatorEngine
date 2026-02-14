@@ -1,25 +1,22 @@
 #include "pch.h"
 #include "SystemManager.h"
 #include "System.h"
-#include "Entity.h"
-#include "Component.h"
 #include "System/MeshSystem.h"
+#include "System/TransformSystem.h"
 
-void SystemManager::FilterEntity(Entity* _entity)
+SystemManager::SystemManager()
 {
-	for (Component* component : _entity->componants)
-	{
-		switch (component->type)
-		{
-			case Component::ComponentType::Mesh:
-				m_meshSystem->AddEntity(_entity);
-				break;
-		default:
-			break;
-		}
-	}
+	MeshSystem* meshSystem = new MeshSystem();
+	TransformSystem* transformSystem = new TransformSystem();
+	m_systems.push_back(meshSystem);
+	m_systems.push_back(transformSystem);
 }
+
+
 void SystemManager::Update()
 {
-
+	for (ISystem* system : m_systems)
+	{
+		system->Update();
+	}
 }

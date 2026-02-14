@@ -60,18 +60,20 @@ void Transform::SetYPR(float yaw, float pitch, float roll)
 	AddYPR(yaw, pitch, roll);
 }
 
-DirectX::XMFLOAT4X4 Transform::BuildMatrix() const
+Matrix4x4f Transform::BuildMatrix() const
 {
-	Matrix result;
 
-	Matrix transMatrix = DirectX::XMMatrixTranslation(position.x, position.y, position.z);
-	Matrix scaleMatrix = DirectX::XMMatrixScaling(scale.x, scale.y, scale.z);
+	// Charger les composants en types SIMD (XMMATRIX / XMVECTOR)
+	Matrix mScale = DirectX::XMMatrixScaling(scale.x, scale.y, scale.z);
+	Matrix mRot = XMLoadFloat4x4(&rotmatrix);
+	Matrix mTrans = DirectX::XMMatrixTranslation(position.x, position.y, position.z);
 
-	result = DirectX::XMMatrixMultiply(scaleMatrix, transMatrix);
-	result = DirectX::XMMatrixMultiply(DirectX::XMLoadFloat4x4(&rotmatrix), result);
+	Matrix world = XMMatrixMultiply(mScale, mRot);
+
+	world = XMMatrixMultiply(world, mTrans);
 
 	Matrix4x4f finalMatrix;
-	DirectX::XMStoreFloat4x4(&finalMatrix, result);
+	XMStoreFloat4x4(&finalMatrix, world);
 
 	return finalMatrix;
 }

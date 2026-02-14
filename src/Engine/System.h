@@ -3,6 +3,13 @@
 class GameManager;
 class Transform;
 
+class ISystem
+{
+public:
+    virtual ~ISystem() = default;
+    virtual void Update() = 0;
+};
+
 class aTransformSystem
 {
 public:

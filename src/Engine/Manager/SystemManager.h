@@ -1,12 +1,13 @@
 #pragma once
 class MeshSystem;
 class Entity;
+class ISystem;
 
 class SystemManager
 {
 public:
-	void FilterEntity(Entity* _entity);
+	SystemManager();
 	void Update();
 private:
-	MeshSystem* m_meshSystem;
+	Vector<ISystem*> m_systems;
 };

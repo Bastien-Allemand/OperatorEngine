@@ -1,12 +1,13 @@
 #pragma once
-
-#include "Entity.h"
-#include "Component.h"
 #include <chrono>
+
 class SystemManager;
+class ComponentManager;
 class Window;
 class RenderEngine;
 class Mesh;
+
+
 
 class GameManager
 {
@@ -16,43 +17,30 @@ public:
 
 	void Run();
 
-	template<typename C>
-	C& GComponent(Id _entity);
-
-	Entity* GEntity(Id _entity);
-
-	void AddEntity(Entity _entity);
-
-	RenderEngine* GetRenderEngine() { return m_renderEngine; }
-	Window* GetWindow() { return m_window; }
-	float GetFPS() { return m_fps; }
-	float GetDeltaTime() { return m_deltaTime; }
+	ComponentManager* GComponentManager() { return m_componentManager; }
+	uint32 GNewEntityId();
+	void DestroyEntity(uint32 _entityId);
+	RenderEngine* GRenderEngine() { return m_renderEngine; }
+	Window* GWindow() { return m_window; }
+	float GFps() { return m_fps; }
+	float GDeltaTime() { return m_deltaTime; }
 
 private:
-	using clock = std::chrono::steady_clock; // monotonic clock, no jumps
+	GameManager();
+	static GameManager* m_instance;
 	std::chrono::steady_clock::time_point m_lastTime;
 	float m_timer = 1;
 	float m_fps = 0;
 	float m_deltaTime = 0;
-	Mesh* m_mesh = nullptr;
-	Matrix4x4f m_obj1;
-	Matrix4x4f m_obj2;
 
+	Vector<uint32> m_entityIds;
+	Vector<uint32> m_freeEntityIds;
+	
+	SystemManager* m_systemManager;
+	ComponentManager* m_componentManager;
 
-	void Update();
-	GameManager();
 	Window* m_window;
 	RenderEngine* m_renderEngine;
-	static GameManager* m_instance;
 
-	SystemManager* m_systemManager;
-
-	Vector<Entity> m_entities;
 };
-
-template<typename C>
-inline C& GameManager::GComponent(Id _entity)
-{
-
-}
 
