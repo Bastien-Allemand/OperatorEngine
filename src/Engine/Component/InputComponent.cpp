@@ -1,6 +1,5 @@
 #include "pch.h"
-#include "Componant.h"
-
+#include "InputComponent.h"
 
 void InputComponent::BindAction(const std::string& _actionName, int key)
 {

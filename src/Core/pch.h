@@ -3,5 +3,5 @@
 
 #include <iostream>
 #include "Define.h"
-
+#include <windows.h>
 #endif

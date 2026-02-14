@@ -15,12 +15,10 @@ public:
 	float m_timer = 1;
 	float fps = 0;
 private:
-	static LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
 	Window* m_window = nullptr;
-	Mesh* m_mesh = nullptr;
 	RenderEngine* m_renderEngine = nullptr;
+	Mesh* m_mesh = nullptr;
 	Matrix4x4f m_obj1;
 	Matrix4x4f m_obj2;
-	bool test = false;
 };
 

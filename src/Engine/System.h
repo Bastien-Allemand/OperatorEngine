@@ -1,50 +1,36 @@
 #pragma once
-#include <vector>
-#include <DirectXMath.h>
-#include "GameManager.h"
 
 class GameManager;
-class Entity;
+class Transform;
 
-class System
+class ISystem
 {
 public:
-    System();
-    virtual ~System() = default;
-    virtual void Update(float deltaTime) = 0;
-	virtual void AddEntity(UINT entityId);
-
-    Entity* GetEntity(UINT id);
-
-    UINT id;
-
-	std::vector<Entity*> m_entitiesss; // Liste des entités que ce système gère
-protected:
-    GameManager* m_gameManager;
-    std::vector<UINT> m_entities;
+    virtual ~ISystem() = default;
+    virtual void Update() = 0;
 };
 
-class TransformSystem : public System
+class aTransformSystem
 {
 public:
-    TransformSystem() = default;
-    void Update(float deltaTime) override;
-	//void AddChildren(Transform& child);
-	//void AddParent(Transform& Parent);
+    aTransformSystem() = default;
+    void Update();
+	void AddChildren(Transform& child);
+	void AddParent(Transform& Parent);
 
     void Move();
 };
 
-class InputSystem : public System
+class InputSystem
 {
 public:
     InputSystem() = default;
-	void Update(float deltaTime) override;
+	void Update() override;
 };
 
 class CollisionSystem : public System
 {
 public:
     CollisionSystem() = default;
-	void Update(float deltaTime) override;
+	void Update() override;
 };

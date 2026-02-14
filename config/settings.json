@@ -13,13 +13,17 @@
                 "additionalLibraryDirectories": [],
                 "preprocessorDefinitions": []
             },
-            "dependencies": [],
-            "dependents": [],
+            "dependencies": [
+                "7AC61C65-12D7-4B43-05AC-469A21C42B14"
+            ],
+            "dependents": [
+                "2A367E35-5163-468C-4666-668C2DE90B90"
+            ],
             "name": "Render",
-            "property-lib": false,
+            "property-lib": true,
             "property-pch": true,
             "property-vcpkg": false,
-            "property-window": true
+            "property-window": false
         },
         "2A367E35-5163-468C-4666-668C2DE90B90": {
             "config-debug": {
@@ -34,7 +38,10 @@
                 "additionalLibraryDirectories": [],
                 "preprocessorDefinitions": []
             },
-            "dependencies": [],
+            "dependencies": [
+                "0BED7C61-63E9-02DA-64DD-040511E73563",
+                "7AC61C65-12D7-4B43-05AC-469A21C42B14"
+            ],
             "dependents": [],
             "name": "Engine",
             "property-lib": false,
@@ -56,9 +63,12 @@
                 "preprocessorDefinitions": []
             },
             "dependencies": [],
-            "dependents": [],
+            "dependents": [
+                "0BED7C61-63E9-02DA-64DD-040511E73563",
+                "2A367E35-5163-468C-4666-668C2DE90B90"
+            ],
             "name": "Core",
-            "property-lib": false,
+            "property-lib": true,
             "property-pch": true,
             "property-vcpkg": false,
             "property-window": false
