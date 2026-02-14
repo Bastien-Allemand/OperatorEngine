@@ -29,6 +29,7 @@ struct VertexOut
 	float4 PosH  : SV_POSITION;
     float3 PosW : POSITION;
     float3 NormalW : NORMAL;
+    float2 Tex : TEXCOORD;
 };
 
 VertexOut VS(VertexIn vin)
@@ -46,6 +47,7 @@ VertexOut VS(VertexIn vin)
     // 3. Transformation de la normale
     vout.NormalW = mul(vin.NormalL, (float3x3)gworld);
     
+    vout.Tex = vin.TexC;
     return vout;
 }
 
@@ -58,7 +60,7 @@ float4 PS(VertexOut pin) : SV_Target
 
     // --- DIFFUSE ---
     float3 lightVec = -gDirLight.Direction;
-    float diffuseFactor = max(dot(lightVec, pin.NormalW), 0.0f);
+    float diffuseFactor = dot(lightVec, pin.NormalW);
     float4 diffuse = diffuseFactor * gDirLight.Diffuse;
 
     // --- SPECULAR ---
@@ -69,18 +71,18 @@ float4 PS(VertexOut pin) : SV_Target
         // Vecteur de la surface vers la caméra
         float3 toEye = normalize(gEyePosW - pin.PosW);
         
-        // Vecteur de réflexion (modèle Phong)
         float3 r = reflect(gDirLight.Direction, pin.NormalW);
         
         // Calcul du facteur spéculaire
-        // Le "pow(..., 16.0f)" contrôle la taille du reflet (plus c'est haut, plus c'est petit/brillant)
-        float specFactor = pow(max(dot(r, toEye), 0.0f), 16.0f);
+        // Le "pow(..., 2.0f)" contrôle la taille du reflet (plus c'est haut, plus c'est petit/brillant)
+        float specFactor = pow(max(dot(r, toEye), 0.0f), 2.0f);
         
         spec = specFactor * gDirLight.Specular;
     }
 
     // --- COMBINAISON FINALE ---
-    float4 finalColor = ambient + diffuse + spec;
+    float4 texColor = float4(1.0f, 1.0f, 1.0f, 1.0f); // Blanc par défaut
+    float4 finalColor = (ambient + diffuse) * texColor + spec;
     finalColor.a = 1.0f;
 
     return finalColor;

@@ -2,6 +2,7 @@
 
 class Mesh;
 class Fence;
+class Camera;
 class Factory;
 class SwapChain;
 class Descriptors;
@@ -43,6 +44,7 @@ public:
 	void CloseDraw();
 	void Draw(Mesh* _mesh, Matrix _matrix);
 	bool Resize(int _width, int _height);
+	Camera* GCamera() const { return m_camera; }
 	bool m4xMsaaState = 0;
 	uint32 m4xMsaaQuality = 0;
 
@@ -76,12 +78,10 @@ private:
 	Mesh* m_quadMesh = nullptr;
 
 	Matrix4x4f m_world;
-	Matrix4x4f m_view;
+	Matrix4x4f m_viewProj;
 	Matrix4x4f m_proj;
+	Camera* m_camera = nullptr;
 	LightData m_lightData;
-	float mTheta = 1.5f * DirectX::XM_PI;
-	float mPhi = DirectX::XM_PIDIV4;
-	float mRadius = 5.0f;
 
 	bool FlushCommandQueue();
 

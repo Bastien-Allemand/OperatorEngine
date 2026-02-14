@@ -24,32 +24,35 @@ void Transform::MoveUp(float distance)
 
 void Transform::AddYPR(float yaw, float pitch, float roll)
 {
-	XVector yAxis = DirectX::XMLoadFloat3(&up);
-	XVector xAxis = DirectX::XMLoadFloat3(&right);
-	XVector zAxis = DirectX::XMLoadFloat3(&forward);
+	using namespace DirectX;
 
-	XVector quat = DirectX::XMLoadFloat4(&quaternion);
+	// 1. Charger les données actuelles
+	XMVECTOR q = XMLoadFloat4(&quaternion);
+	XMVECTOR xAxis = XMLoadFloat3(&right);
+	XMVECTOR yAxis = XMLoadFloat3(&up);
+	XMVECTOR zAxis = XMLoadFloat3(&forward);
 
-	quat = DirectX::XMQuaternionMultiply(quat, DirectX::XMQuaternionRotationAxis(yAxis, DirectX::XMConvertToRadians(yaw)));
-	quat = DirectX::XMQuaternionMultiply(quat, DirectX::XMQuaternionRotationAxis(xAxis, DirectX::XMConvertToRadians(pitch)));
-	quat = DirectX::XMQuaternionMultiply(quat, DirectX::XMQuaternionRotationAxis(zAxis, DirectX::XMConvertToRadians(roll)));
+	// 2. Créer les rotations locales (Quaternion local = axe * angle)
+	// On multiplie dans l'ordre Y -> X -> Z (Yaw, Pitch, Roll)
+	if (yaw != 0.0f)   q = XMQuaternionMultiply(q, XMQuaternionRotationAxis(yAxis,yaw));
+	if (pitch != 0.0f) q = XMQuaternionMultiply(q, XMQuaternionRotationAxis(xAxis,pitch));
+	if (roll != 0.0f)  q = XMQuaternionMultiply(q, XMQuaternionRotationAxis(zAxis,roll));
 
-	quat = DirectX::XMQuaternionNormalize(quat);
-	DirectX::XMStoreFloat4(&quaternion, quat);
+	// 3. Normaliser pour éviter la dérive numérique
+	q = XMQuaternionNormalize(q);
+	XMStoreFloat4(&quaternion, q);
 
-	DirectX::XMStoreFloat4x4(&rotmatrix, DirectX::XMMatrixRotationQuaternion(DirectX::XMLoadFloat4(&quaternion)));
-	right.x = rotmatrix._11;
-	right.y = rotmatrix._12;
-	right.z = rotmatrix._13;
-	up.x = rotmatrix._21;
-	up.y = rotmatrix._22;
-	up.z = rotmatrix._23;
-	forward.x = rotmatrix._31;
-	forward.y = rotmatrix._32;
-	forward.z = rotmatrix._33;
+	// 4. Générer la matrice et extraire les nouveaux axes proprement
+	XMMATRIX rot = XMMatrixRotationQuaternion(q);
+	XMStoreFloat4x4(&rotmatrix, rot);
+
+	// Extraction directe via les registres de la matrice (plus rapide)
+	XMStoreFloat3(&right, rot.r[0]); // Ligne 0
+	XMStoreFloat3(&up, rot.r[1]); // Ligne 1
+	XMStoreFloat3(&forward, rot.r[2]); // Ligne 2
 }
 
-void Transform::SetYPR(float yaw, float pitch, float roll)
+void Transform::SYPR(float yaw, float pitch, float roll)
 {
 	forward = { 0.0f, 0.0f, 1.0f };
 	right = { 1.0f, 0.0f, 0.0f };
@@ -78,14 +81,14 @@ Matrix4x4f Transform::BuildMatrix() const
 	return finalMatrix;
 }
 
-void Transform::SetPosition(float x, float y, float z)
+void Transform::SPosition(float x, float y, float z)
 {
 	position.x = x;
 	position.y = y;
 	position.z = z;
 }
 
-void Transform::SetScale(float x, float y, float z)
+void Transform::SScale(float x, float y, float z)
 {
 	scale.x = x;
 	scale.y = y;

@@ -4,6 +4,7 @@
 
 #include "Mesh.h"
 #include "Fence.h"
+#include "Camera.h"
 #include "Factory.h"
 #include "Geometry.h"
 #include "SwapChain.h"
@@ -12,8 +13,9 @@
 #include "RenderTarget.h"
 #include "DirectXColors.h"
 #include "CommandContext.h"
-#include "PipelineStateObject.h"
+#include "Core/Transform.h"
 #include "ConstantBuffer.h"
+#include "PipelineStateObject.h"
 
 
 RenderEngine::~RenderEngine()
@@ -60,24 +62,27 @@ bool RenderEngine::Init(int _width, int _height, HWND _handle)
 
 void RenderEngine::Update(float dt)
 {
-	float x = mRadius * sinf(mPhi) * cosf(mTheta);
-	float z = mRadius * sinf(mPhi) * sinf(mTheta);
-	float y = mRadius * cosf(mPhi);
-	DirectX::XMVECTOR pos = DirectX::XMVectorSet(x, y, z, 1.0f);
-	DirectX::XMVECTOR target = DirectX::XMVectorZero();
-	DirectX::XMVECTOR up = DirectX::XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
-	DirectX::XMMATRIX view = DirectX::XMMatrixLookAtLH(pos, target, up);
+	Matrix view = m_camera->BuildViewMatrix();
+	Matrix world = DirectX::XMLoadFloat4x4(&m_world);
+	Matrix proj = DirectX::XMLoadFloat4x4(&m_proj);
 
-	DirectX::XMStoreFloat4x4(&m_view, view);
-	DirectX::XMMATRIX world = DirectX::XMLoadFloat4x4(&m_world);
-	DirectX::XMStoreFloat4x4(&m_world, world);
-	DirectX::XMMATRIX proj = DirectX::XMLoadFloat4x4(&m_proj);
 	ConstantBufferPass cb;
-	DirectX::XMMATRIX viewProj = view * proj;
-	DirectX::XMStoreFloat4x4(&cb.gViewProj, DirectX::XMMatrixTranspose(viewProj));
-	DirectX::XMStoreFloat4x4(&cb.gWorld, DirectX::XMMatrixTranspose(world));
 
-	m_sceneCB->CopyData(0, cb);
+	Matrix viewProj = view * proj;
+	DirectX::XMStoreFloat4x4(&cb.gWorld, DirectX::XMMatrixTranspose(world));
+	DirectX::XMStoreFloat4x4(&cb.gViewProj, DirectX::XMMatrixTranspose(viewProj));
+
+	DirectX::XMStoreFloat4x4(&m_viewProj, viewProj);
+
+	DirectionalLight passData;
+	passData.Ambient = { 1.f, 1.0f, 1.0f, 1 };
+	passData.Diffuse = { 0.01f, 0.01f, 0.01f, 1 };
+	passData.Direction = {m_camera->transform->forward.x,m_camera->transform->forward.y,m_camera->transform->forward.z };
+	LightData data;
+	data.DirLight = passData;
+	data.EyePosW = m_camera->transform->position;
+
+	m_lightData = data;
 }
 
 void RenderEngine::InitMesh(Mesh* _mesh)
@@ -118,6 +123,7 @@ void RenderEngine::BeginDraw()
 	list->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
 	list->SetGraphicsRootConstantBufferView(0, m_sceneCB->GetAddress());
+	m_lightCB->CopyData(0, m_lightData);
 	list->SetGraphicsRootConstantBufferView(1, m_lightCB->GetAddress());
 }
 
@@ -145,31 +151,40 @@ void RenderEngine::CloseDraw()
 void RenderEngine::Draw(Mesh* _mesh,Matrix _matrix)
 {
 	ConstantBufferPass cb;
-	Matrix view = DirectX::XMLoadFloat4x4(&m_view);
-	Matrix proj = DirectX::XMLoadFloat4x4(&m_proj);
+
+	Matrix viewProj = DirectX::XMLoadFloat4x4(&m_viewProj);
+
 	Matrix world = DirectX::XMLoadFloat4x4(&m_world);
-	_matrix = world * _matrix;
-	DirectX::XMMATRIX viewProj = view * proj;
+
+	_matrix = _matrix * world;
+
 	DirectX::XMStoreFloat4x4(&cb.gWorld, DirectX::XMMatrixTranspose(_matrix));
 	DirectX::XMStoreFloat4x4(&cb.gViewProj, DirectX::XMMatrixTranspose(viewProj));
+
 	if (m_instanceCB.size() <= m_instanceCbIndex)
 	{
+
 		m_instanceCB.push_back(new ConstantBuffer<ConstantBufferPass>());
 		bool r = m_instanceCB[m_instanceCbIndex]->Init(m_renderDevice->GDevice(), m_desc->GcbvHeap(), 2 + m_instanceCbIndex);
 		Log(r, "Initializing new Instance Constant Buffer");
 	}
+
 	m_instanceCB[m_instanceCbIndex]->CopyData(0, cb);
+
 	auto list = m_commandContext->GCommandList();
 
 	list->SetGraphicsRootConstantBufferView(0, m_instanceCB[m_instanceCbIndex]->GetAddress());
+
 	_mesh->Bind(list);
+
 	list->DrawIndexedInstanced(_mesh->GetIndexCount(), 1, 0, 0, 0);
+
 	m_instanceCbIndex++;
 }
 
 bool RenderEngine::Resize(int _width, int _height)
 {
-	DirectX::XMMATRIX proj = DirectX::XMMatrixPerspectiveFovLH(0.25f * DirectX::XM_PI, static_cast<float>(_width) / _height, 0.1f, 1000.0f);
+	Matrix proj = DirectX::XMMatrixPerspectiveFovLH(0.25f * DirectX::XM_PI, static_cast<float>(_width) / _height, 0.1f, 1000.0f);
 	DirectX::XMStoreFloat4x4(&m_proj, proj);
 
 	m_commandContext->GCommandList()->Reset(m_commandContext->GCommandAllocator(), nullptr);
@@ -196,7 +211,6 @@ bool RenderEngine::Resize(int _width, int _height)
 		ID3D12Resource* backBuffer = nullptr;
 		m_swapChain->GSwapChain()->GetBuffer(i, IID_PPV_ARGS(&backBuffer));
 
-		// ICI : Il faut mettre à jour ton objet RenderTarget !
 		m_renderTarget->SCurrentBackBuffer(i, backBuffer);
 
 		m_renderDevice->GDevice()->CreateRenderTargetView(backBuffer, nullptr, rtvHandle);
@@ -298,18 +312,18 @@ void RenderEngine::HardInit()
 	m_renderTarget = new RenderTarget();
 	m_sceneCB = new ConstantBuffer<ConstantBufferPass>();
 	m_lightCB = new ConstantBuffer<LightData>();
-	DirectX::XMMATRIX world = DirectX::XMMatrixIdentity();
-	DirectX::XMStoreFloat4x4(&m_world, world);
-	DirectX::XMStoreFloat4x4(&m_view, world);
-	DirectX::XMStoreFloat4x4(&m_proj, world);
+	m_camera = new Camera();
+	Matrix Identity = DirectX::XMMatrixIdentity();
+	DirectX::XMStoreFloat4x4(&m_world, Identity);
+	DirectX::XMStoreFloat4x4(&m_proj, Identity);
 
 	DirectionalLight passData;
 	passData.Ambient = { 0.1f, 0.1f, 0.1f, 1.0f };
 	passData.Diffuse = { 0.8f, 0.8f, 0.8f, 1.0f };
-	passData.Direction = { 0.577f, -0.577f, 0.577f };
+	passData.Direction = m_camera->transform->forward;
 	LightData data;
 	data.DirLight = passData;
-	data.EyePosW = { 0, 0, 0 };
+	data.EyePosW = m_camera->transform->position;
 
 	m_lightData = data;
 }
