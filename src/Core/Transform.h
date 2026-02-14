@@ -10,12 +10,12 @@ public:
 	void MoveUp(float distance);
 
 	void AddYPR(float yaw, float pitch, float roll);
-	void SetYPR(float yaw, float pitch, float roll);
+	void SYPR(float yaw, float pitch, float roll);
 
 	Matrix4x4f BuildMatrix() const;
 
-	void SetPosition(float x, float y, float z);
-	void SetScale(float x, float y, float z);
+	void SPosition(float x, float y, float z);
+	void SScale(float x, float y, float z);
 
 	Vector3f position = {0,0,0};
 
@@ -24,7 +24,7 @@ public:
 	Vector3f up = VEC3_UP;
 	Vector3f right = VEC3_RIGHT;
 	Vector3f forward = VEC3_FOWARD;
-	Vector4f quaternion = QUAT_ZERO;
+	Vector4f quaternion = QUAT_IDENTITY;
 
 	Matrix4x4f rotmatrix = MATRIX_IDENTITY;
 };

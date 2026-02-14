@@ -4,7 +4,9 @@
 #include "ComponentManager.h"
 
 #include "Core/Window.h"
+#include "Core/Transform.h"
 #include "Render/RenderEngine.h"
+#include "Render/Camera.h"
 
 
 GameManager* GameManager::m_instance = nullptr;
@@ -51,6 +53,8 @@ GameManager::~GameManager()
 void GameManager::Run()
 {
 	MSG msg = { 0 };
+	m_lastTime = std::chrono::steady_clock::now();
+	float rotation = 0;
 	while (true) {
 		if (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE)) {
 			if (msg.message == WM_QUIT) break;
@@ -79,6 +83,10 @@ void GameManager::Run()
 
 			m_renderEngine->Update(deltaTime.count());
 			m_systemManager->Update();
+			m_renderEngine->GCamera()->transform->position.z = -2.6;
+			m_renderEngine->GCamera()->transform->position.y = -2.6;
+			m_renderEngine->GCamera()->transform->AddYPR(0,-0.1 * m_deltaTime,0);
+			rotation += -1 * m_deltaTime;
 		}
 	}
 }

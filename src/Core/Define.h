@@ -52,6 +52,7 @@ inline Vector3f VEC3_FOWARD = { 0.0f, 0.0f, 1.0f };
 inline Vector3f VEC3_ZERO = { 0.0f, 0.0f, 0.0f };
 inline Vector3f VEC3_ONE = { 1.0f, 1.0f, 1.0f };
 inline Quaternion QUAT_ZERO = { 0.0f, 0.0f, 0.0f, 0.0f };
+inline Quaternion QUAT_IDENTITY = { 0.0f, 0.0f, 0.0f, 1.0f };
 inline Matrix4x4f MATRIX_IDENTITY = 
 { 1.0f, 0.0f, 0.0f, 0.0f,
   0.0f, 1.0f, 0.0f, 0.0f,
